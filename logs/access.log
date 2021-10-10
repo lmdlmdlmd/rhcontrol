@@ -1,6 +1,0 @@
-127.0.0.1 - - [10/Oct/2021:19:09:03 +0800] "GET / HTTP/1.1" 200 95 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36"
-127.0.0.1 - - [10/Oct/2021:19:09:03 +0800] "GET /favicon.ico HTTP/1.1" 200 5430 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36"
-127.0.0.1 - - [10/Oct/2021:19:09:20 +0800] "GET /api/index HTTP/1.1" 200 21 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36"
-127.0.0.1 - - [10/Oct/2021:19:12:44 +0800] "GET / HTTP/1.1" 304 0 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36"
-127.0.0.1 - - [10/Oct/2021:19:12:45 +0800] "GET /favicon.ico HTTP/1.1" 200 5430 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36"
-127.0.0.1 - - [10/Oct/2021:19:12:50 +0800] "GET /api/index HTTP/1.1" 200 21 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36"
