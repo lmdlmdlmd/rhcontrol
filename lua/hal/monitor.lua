@@ -27,6 +27,16 @@ _M.register = function(host, port, obj, maxsize)
     return #devs
 end
 
+local ngx_re = require "ngx.re"
+local split = ngx_re.split
+local stringtotable = function(str)
+    local list = split(str, '')
+    local ret = {}
+    for _, v in ipairs(list) do
+        ret[#ret + 1] = string.byte(v)
+    end
+    return ret
+end
 _M.read = function()
     local devs = _M.devs
     local tasks = {}
@@ -43,7 +53,10 @@ _M.read = function()
             log(ERR, format('host=%s port=%s fail=%s', devs[i].host, devs[i].port, res))
         else
             local obj = devs[i].obj
+            res = stringtotable(res)
             obj:set_data(res)
+            log(ERR, type(res))
+            log(ERR, ins(res))
             if not res then
                 log(ERR, 'res is null:', ins(res))
             end

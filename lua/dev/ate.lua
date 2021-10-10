@@ -3,8 +3,8 @@ local crc16 = require "lib.crc16"
 local util  = require "lib.util"
 local format = string.format
 
-local log = ngx.log
-local ERR = ngx.ERR
+-- local log = ngx.log
+-- local ERR = ngx.ERR
 -- local DBG = ngx.DEBUG
 -- local ins = require 'lib.inspect'
 
@@ -77,7 +77,7 @@ Ate.set_data = function(self, newdata, start )
     start = start or 0
     for i, v in ipairs(newdata) do
         data[i + start] = v
-        log(ERR, i+start, '=', v)
+        -- log(ERR, i+start, '=', v)
     end
     return true
 end
