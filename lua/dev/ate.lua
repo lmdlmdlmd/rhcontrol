@@ -1,7 +1,9 @@
 local ds    = require "lib.ds"
 local crc16 = require "lib.crc16"
 local util  = require "lib.util"
+-- local bit   = require "bit"
 local format = string.format
+-- local shl    = bit.shl
 
 -- local log = ngx.log
 -- local ERR = ngx.ERR
@@ -13,7 +15,7 @@ Ate.__index = Ate
 
 local dev_config = {
     start_reg = 0x00,
-    max_len = 22,
+    max_len = 24,
     read_key_fun = 0x03,
     write_key_fun = 0x06
 }
@@ -88,8 +90,9 @@ end
 
 local get = function(self, index)
   local data = self.data
+  local nindex = 3 + (index * 2)
   if self.health ~= ds.DEV_HEALTH_OFFLINE then
-      return data[index]
+      return data[nindex - 1] * 256 + data[nindex]
   end
   return nil
 end

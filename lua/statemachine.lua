@@ -18,6 +18,9 @@ end
 _M.run = function()
     monitor.read()
     log(ERR, 'temp is:', monitor.devs[1].obj:get_temp())
+    log(ERR, 'temp is:', monitor.devs[1].obj:get_humi())
 end
 
+-- _M.init()
+-- _M.run()
 return _M
