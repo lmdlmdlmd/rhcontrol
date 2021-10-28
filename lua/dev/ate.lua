@@ -17,7 +17,8 @@ local dev_config = {
     start_reg = 0x00,
     max_len = 24,
     read_key_fun = 0x03,
-    write_key_fun = 0x06
+    write_key_fun = 0x06,
+    max_sick_to_offline = 4
 }
 
 function Ate.new(addr)
@@ -25,7 +26,8 @@ function Ate.new(addr)
     self.addr = addr or 0xf -- default addr is 0x0f
     self.data = {}
     self.read_all_cmd = nil
-    self.health = 0
+    self.health = ds.DEV_HEALTH_OFFLINE
+    self.sick_count = 0
     return self
 end
 
@@ -74,6 +76,7 @@ Ate.set_data = function(self, newdata, start )
     if not (newdata and type(newdata) == 'table') then
         return nil
     end
+    self.sick_count = 0
     self.health = ds.DEV_HEALTH_ONLINE
     local data = self.data
     start = start or 0
@@ -85,7 +88,12 @@ Ate.set_data = function(self, newdata, start )
 end
 
 Ate.fail = function(self, code)
-    self.health = code
+    self.sick_count = self.sick_count + 1
+    if self.sick_count > dev_config.max_sick_to_offline then
+        self.health = ds.DEV_HEALTH_OFFLINE
+    else
+        self.health = code
+    end
 end
 
 local get = function(self, index)

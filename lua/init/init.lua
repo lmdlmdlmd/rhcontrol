@@ -3,7 +3,7 @@ local new_timer = ngx.timer.at
 local log = ngx.log
 local ERR = ngx.ERR
 local check
-local statemachine = require 'statemachine'
+local statemachine = require 'init.statemachine'
 
 check = function(premature)
 

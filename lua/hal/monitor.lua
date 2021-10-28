@@ -1,9 +1,13 @@
 local net =  require 'lib.net'
+local ds    = require "lib.ds"
 
 local send = net.send
 local spawn = ngx.thread.spawn
 local wait = ngx.thread.wait
 local format = string.format
+local ngx_re = require "ngx.re"
+local split = ngx_re.split
+
 local log = ngx.log
 local ERR = ngx.ERR
 -- local DBG = ngx.DEBUG
@@ -13,7 +17,7 @@ local _M = {
     devs = {}
 }
 
-_M.register = function(host, port, obj, maxsize)
+_M.register = function(host, port, obj, name, maxsize)
     local devs = _M.devs
     if not obj or not host or not port then
         return nil
@@ -22,13 +26,23 @@ _M.register = function(host, port, obj, maxsize)
       host = host,
       port = port,
       obj  = obj,
+      name = name,
       maxsize = maxsize
     }
     return #devs
 end
 
-local ngx_re = require "ngx.re"
-local split = ngx_re.split
+_M.get = function(name)
+    local devs = _M.devs
+    if not name then return nil end
+    for _, v in ipairs(devs) do
+        if v.name == name then
+            return v.obj
+        end
+    end
+    return
+end
+
 local stringtotable = function(str)
     local list = split(str, '')
     local ret = {}
@@ -53,12 +67,13 @@ _M.read = function()
             log(ERR, format('host=%s port=%s fail=%s', devs[i].host, devs[i].port, res))
         else
             local obj = devs[i].obj
-            res = stringtotable(res)
-            obj:set_data(res)
-            log(ERR, type(res))
-            log(ERR, ins(res))
-            if not res then
-                log(ERR, 'res is null:', ins(res))
+            if res then
+                res = stringtotable(res)
+                obj:set_data(res)
+                log(ERR, ins(res))
+            else
+                obj:fail(ds.DEV_HEALTH_SICK)
+                log(ERR, 'received is nil')
             end
         end
     end

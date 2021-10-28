@@ -91,7 +91,7 @@ _M.send = function(host, port, data, maxreadsize)
         log(ERR, 'failed to get lock:', lockname)
     end
 
-    return readdata
+    return readdata, err
 end
 
 -- local data = {0x0F,0x03,0x0,0x0,0x0,0x16,0xC5,0x2A}
