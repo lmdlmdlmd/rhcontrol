@@ -1,9 +1,9 @@
 local ds    = require "lib.ds"
 local crc16 = require "lib.crc16"
 local util  = require "lib.util"
--- local bit   = require "bit"
+local bit   = require "bit"
 local format = string.format
--- local shl    = bit.shl
+local lshift = bit.lshift
 
 -- local log = ngx.log
 -- local ERR = ngx.ERR
@@ -92,7 +92,7 @@ local get = function(self, index)
   local data = self.data
   local nindex = 3 + (index * 2)
   if self.health ~= ds.DEV_HEALTH_OFFLINE then
-      return data[nindex - 1] * 256 + data[nindex]
+      return lshift(data[nindex - 1], 8) + data[nindex]
   end
   return nil
 end
