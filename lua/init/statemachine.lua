@@ -3,6 +3,9 @@ local monitor = require 'hal.monitor'
 local Ate = require 'dev.ate'
 local Newfan = require 'dev.newfan'
 local Aircond = require 'dev.aircond'
+local net =  require 'lib.net'
+
+local send = net.send
 local HOST = '192.168.0.7'
 -- local HOST = '127.0.0.1'
 
@@ -28,6 +31,10 @@ _M.run = function()
     local aircond1 = monitor.get('aircond1')
     log(ERR, 'temp is:', ate:get_temp())
     log(ERR, 'humi is:', ate:get_humi())
+    log(ERR, 'pm25 is:', ate:get_pm25())
+
+    local ate_dev = monitor.get_dev('ate')
+    send(ate_dev.host, ate_dev.port, ate.get_led_cmd())
 
     log(ERR, ate)
     log(ERR, newfan1)

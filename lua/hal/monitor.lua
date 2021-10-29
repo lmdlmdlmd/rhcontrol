@@ -32,16 +32,23 @@ _M.register = function(host, port, obj, name, maxsize)
     return #devs
 end
 
-_M.get = function(name)
+_M.get_dev = function(name)
     local devs = _M.devs
     if not name then return nil end
     for _, v in ipairs(devs) do
         if v.name == name then
-            return v.obj
+            return v
         end
     end
-    return
+    return nil
 end
+
+_M.get = function(name)
+    local dev = _M.get_dev(name)
+    if dev then return dev.obj end
+    return nil
+end
+
 
 local stringtotable = function(str)
     local list = split(str, '')

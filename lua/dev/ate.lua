@@ -47,6 +47,16 @@ function Ate.get_read_cmd(self)
     return cmd
 end
 
+function Ate.get_led_cmd(self)
+    local addr = self.addr
+    local cmd = { addr, dev_config.write_key_fun,
+                        0x00, 19,
+                        0x00, 0x00}
+    local crc_list = crc16(cmd)
+    cmd[#cmd + 1] = crc_list[1]
+    cmd[#cmd + 1] = crc_list[2]
+    return cmd
+end
 --- data format
 -- command: 0F,03,00,00,00,16,C5,2A
 -- 0x0 0xa version
@@ -105,9 +115,14 @@ local get = function(self, index)
   return nil
 end
 
-Ate.get_pm2 = function(self)
-    return get(self, 3)
+Ate.get_pm25 = function(self)
+    local status = get(self, 3)
+    if status == 0 then
+        return get(self, 10)
+    end
+    return nil
 end
+
 Ate.get_temp = function(self)
     local status = get(self,6)
     if status == 0 then
@@ -127,6 +142,7 @@ Ate.__tostring = function(self)
     local str = {}
     str[#str + 1] = format('ate:%d, health=%d', self.addr, self.health)
     str[#str + 1] = format('data: %s', util.format_bytes(self.data))
+    str[#str + 1] = format('led: %d', get(self, 19))
     return table.concat(str, "\r\n")
 end
 
