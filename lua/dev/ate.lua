@@ -2,11 +2,14 @@ local ds    = require "lib.ds"
 local crc16 = require "lib.crc16"
 local util  = require "lib.util"
 local bit   = require "bit"
+local helprd = require "lib.helpredis"
+local cjson      = require "cjson.safe"
+
 local format = string.format
 local lshift = bit.lshift
 
--- local log = ngx.log
--- local ERR = ngx.ERR
+local log = ngx.log
+local ERR = ngx.ERR
 -- local DBG = ngx.DEBUG
 -- local ins = require 'lib.inspect'
 
@@ -14,6 +17,7 @@ local Ate = {}
 Ate.__index = Ate
 
 local dev_config = {
+    name = 'ate',
     start_reg = 0x00,
     max_len = 24,
     read_key_fun = 0x03,
@@ -38,8 +42,8 @@ function Ate.get_read_cmd(self)
         return self.read_all_cmd
     end
     local cmd = { addr, dev_config.read_key_fun,
-                        0x00, dev_config.start_reg,
-                        0x00, dev_config['max_len']}
+                  0x00, dev_config.start_reg,
+                  0x00, dev_config['max_len']}
     local crc_list = crc16(cmd)
     cmd[#cmd + 1] = crc_list[1]
     cmd[#cmd + 1] = crc_list[2]
@@ -50,8 +54,8 @@ end
 function Ate.get_led_cmd(self)
     local addr = self.addr
     local cmd = { addr, dev_config.write_key_fun,
-                        0x00, 19,
-                        0x00, 0x00}
+                  0x00, 19,
+                  0x00, 0x00}
     local crc_list = crc16(cmd)
     cmd[#cmd + 1] = crc_list[1]
     cmd[#cmd + 1] = crc_list[2]
@@ -94,15 +98,22 @@ Ate.set_data = function(self, newdata, start )
         data[i + start] = v
         -- log(ERR, i+start, '=', v)
     end
+    Ate.serialization(self)
     return true
 end
 
 Ate.fail = function(self, code)
     self.sick_count = self.sick_count + 1
+    local old_health = self.health
     if self.sick_count > dev_config.max_sick_to_offline then
         self.health = ds.DEV_HEALTH_OFFLINE
     else
         self.health = code
+    end
+
+    -- 如果值不一样，则序列化
+    if old_health ~= self.health then
+        Ate.serialization(self)
     end
 end
 
@@ -137,6 +148,45 @@ Ate.get_humi = function(self)
     end
     return nil
 end
+
+local get_key = function(name, addr)
+    return format('%s:%d', name, addr)
+end
+
+Ate.serialization = function(self)
+    local d = {
+        data = self.data,
+        health = self.health,
+        sick_count = self.sick_count,
+        ts = ngx.time()
+    }
+    local key = get_key(dev_config.name, self.addr)
+    local d_str = cjson.encode(d)
+    log(ERR, d_str)
+    local redis = helprd.get()
+    redis:set(key, d_str)
+    return  true
+end
+
+Ate.unserialization = function(self)
+    local key = get_key(dev_config.name, self.addr)
+    -- local d_str = cjson.encode(d)
+    local redis = helprd.get()
+    local d_str = redis:get(key)
+    log(ERR, d_str)
+    if d_str then
+        local d = cjson.decode(d_str)
+        if d then
+            self.data = d.data
+            self.health = d.health
+            self.sick_count = d.sick_count
+            self.ts = d.ts
+            return  true
+        end
+    end
+    return  false
+end
+
 
 Ate.__tostring = function(self)
     local str = {}
