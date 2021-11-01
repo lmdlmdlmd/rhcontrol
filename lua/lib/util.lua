@@ -1,5 +1,6 @@
 local _M = {}
-
+local ngx_re = require "ngx.re"
+local split = ngx_re.split
 local format = string.format
 
 _M.format_bytes = function(bytes)
@@ -10,6 +11,15 @@ _M.format_bytes = function(bytes)
         bytes_str[#bytes_str + 1] = format('0x%02X', v)
     end
     return table.concat(bytes_str, ',')
+end
+
+_M.stringtotable = function(str)
+    local list = split(str, '')
+    local ret = {}
+    for _, v in ipairs(list) do
+        ret[#ret + 1] = string.byte(v)
+    end
+    return ret
 end
 
 return _M

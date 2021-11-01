@@ -28,9 +28,11 @@ local dev_config = {
     max_sick_to_offline = 4
 }
 
-function Aircond.new(addr)
+function Aircond.new(addr, host, port)
     local self = setmetatable({}, Aircond)
-    self.addr = addr or 0xf -- default addr is 0x0f
+    self.addr = addr or 0x1 -- default addr is 0x0f
+    self.host = host
+    self.port = port
     self.input_data = {}
     self.hold_data = {}
     self.read_input_cmd = nil
@@ -95,6 +97,16 @@ Aircond.fail = function(self, code)
     else
         self.health = code
     end
+end
+
+Aircond.get_health = function(self)
+    return self.health
+end
+Aircond.get_host = function(self)
+    return self.host
+end
+Aircond.get_port = function(self)
+    return self.port
 end
 
 -- local get = function(self, index)

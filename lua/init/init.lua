@@ -1,4 +1,4 @@
-local delay = 30 -- 30 seconds period tasks
+local delay = 10 -- 30 seconds period tasks
 local new_timer = ngx.timer.at
 local log = ngx.log
 local ERR = ngx.ERR
@@ -12,6 +12,7 @@ check = function(premature)
     }
    if not premature then
        for _, f in ipairs(tasks) do
+           -- log(ERR, ngx.time())
            xpcall(f.run, debug.traceback)
        end
        local ok, err = new_timer(delay, check)

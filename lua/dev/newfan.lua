@@ -1,9 +1,9 @@
 local ds    = require "lib.ds"
 local crc16 = require "lib.crc16"
 local util  = require "lib.util"
--- local bit   = require "bit"
+local bit   = require "bit"
 local format = string.format
--- local lshift = bit.lshift
+local lshift = bit.lshift
 
 -- local log = ngx.log
 -- local ERR = ngx.ERR
@@ -20,20 +20,22 @@ local dev_config = {
     input_registetr = {
         key = 0x04,
         start_reg = 0x0,
-        max_len = 20
+        max_len = 18
     },
     hold_register = {
         key = 0x03,
         start_reg = 0x0,
-        max_len = 20
+        max_len = 24
     },
     write_key_fun = 0x06,
     max_sick_to_offline = 4,
 }
 
-function Newfan.new(addr)
+function Newfan.new(addr, host, port)
     local self = setmetatable({}, Newfan)
-    self.addr = addr or 0xf -- default addr is 0x0f
+    self.addr = addr or 0x1 -- default addr is 0x0f
+    self.host = host
+    self.port = port
     self.input_data = {}
     self.hold_data = {}
     self.read_input_cmd = nil
@@ -100,14 +102,36 @@ Newfan.fail = function(self, code)
     end
 end
 
--- local get = function(self, index)
---   local data = self.data
---   local nindex = 3 + (index * 2)
---   if self.health ~= ds.DEV_HEALTH_OFFLINE then
---       return lshift(data[nindex - 1], 8) + data[nindex]
---   end
---   return nil
--- end
+Newfan.get_health = function(self)
+    return self.health
+end
+Newfan.get_host = function(self)
+    return self.host
+end
+Newfan.get_port = function(self)
+    return self.port
+end
+
+local get = function(self, data, index)
+  local nindex = (index * 2)
+  if nindex > #data then
+      return nil
+  end
+  if self.health ~= ds.DEV_HEALTH_OFFLINE then
+      return lshift(data[nindex - 1], 8) + data[nindex]
+  end
+  return nil
+end
+
+Newfan.get = function(self, index)
+    local data = self.input_data
+    return get(self, data, index)
+end
+
+Newfan.get_hold = function(self, index)
+    local data = self.hold_data
+    return get(self, data, index)
+end
 
 Newfan.__tostring = function(self)
     local str = {}

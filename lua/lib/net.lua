@@ -9,27 +9,9 @@ local format_bytes = util.format_bytes
 
 local log = ngx.log
 local ERR = ngx.ERR
--- local DBG = ngx.DEBUG
+local DBG = ngx.DEBUG
 local ins = require 'lib.inspect'
 
--- local hexbits = {
---   ['0'] = '0000',
---   ['1'] = '0001',
---   ['2'] = '0010',
---   ['3'] = '0011',
---   ['4'] = '0100',
---   ['5'] = '0101',
---   ['6'] = '0110',
---   ['7'] = '0111',
---   ['8'] = '1000',
---   ['9'] = '1001',
---   ['A'] = '1010',
---   ['B'] = '1011',
---   ['C'] = '1100',
---   ['D'] = '1101',
---   ['E'] = '1110',
---   ['F'] = '1111'
--- }
 -- assume data is only bytes data
 local tabletostring = function(data)
     if not data then return '' end
@@ -67,7 +49,7 @@ _M.send = function(host, port, data, maxreadsize)
             log(ERR, 'connect send:', ins(err))
             goto sendexit
         else
-            log(ERR, 'sending ok:', host, ':', port, '=', format_bytes(data), ',len=', bytes)
+            log(DBG, 'sending ok:', host, ':', port, '=', format_bytes(data), ',len=', bytes)
         end
         -- sock:settimeouts(10000,10000,10000)
         maxreadsize = maxreadsize or 1024

@@ -8,4 +8,6 @@ _M.DEV_TYPE_ATE = 1
 _M.DEV_TYPE_NEWFAN = 2
 _M.DEV_TYPE_AIRCOND = 3
 
+
+
 return _M

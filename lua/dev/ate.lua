@@ -3,7 +3,7 @@ local crc16 = require "lib.crc16"
 local util  = require "lib.util"
 local bit   = require "bit"
 local helprd = require "lib.helpredis"
-local cjson      = require "cjson.safe"
+local cjson  = require "cjson.safe"
 
 local format = string.format
 local lshift = bit.lshift
@@ -25,9 +25,11 @@ local dev_config = {
     max_sick_to_offline = 4
 }
 
-function Ate.new(addr)
+function Ate.new(addr, host, port)
     local self = setmetatable({}, Ate)
     self.addr = addr or 0xf -- default addr is 0x0f
+    self.host = host
+    self.port = port
     self.data = {}
     self.read_all_cmd = nil
     self.health = ds.DEV_HEALTH_OFFLINE
@@ -51,16 +53,6 @@ function Ate.get_read_cmd(self)
     return cmd
 end
 
-function Ate.get_led_cmd(self)
-    local addr = self.addr
-    local cmd = { addr, dev_config.write_key_fun,
-                  0x00, 19,
-                  0x00, 0x00}
-    local crc_list = crc16(cmd)
-    cmd[#cmd + 1] = crc_list[1]
-    cmd[#cmd + 1] = crc_list[2]
-    return cmd
-end
 --- data format
 -- command: 0F,03,00,00,00,16,C5,2A
 -- 0x0 0xa version
@@ -120,12 +112,28 @@ end
 local get = function(self, index)
   local data = self.data
   local nindex = 3 + (index * 2)
+  if nindex > #data then
+      return nil
+  end
   if self.health ~= ds.DEV_HEALTH_OFFLINE then
       return lshift(data[nindex - 1], 8) + data[nindex]
   end
   return nil
 end
 
+Ate.get_health = function(self)
+    return self.health
+end
+Ate.get_host = function(self)
+    return self.host
+end
+Ate.get_port = function(self)
+    return self.port
+end
+
+Ate.get = function(self, addr)
+    return get(self, addr)
+end
 Ate.get_pm25 = function(self)
     local status = get(self, 3)
     if status == 0 then
@@ -162,7 +170,7 @@ Ate.serialization = function(self)
     }
     local key = get_key(dev_config.name, self.addr)
     local d_str = cjson.encode(d)
-    log(ERR, d_str)
+    -- log(ERR, d_str)
     local redis = helprd.get()
     redis:set(key, d_str)
     return  true
@@ -173,7 +181,7 @@ Ate.unserialization = function(self)
     -- local d_str = cjson.encode(d)
     local redis = helprd.get()
     local d_str = redis:get(key)
-    log(ERR, d_str)
+    -- log(ERR, d_str)
     if d_str then
         local d = cjson.decode(d_str)
         if d then
@@ -187,6 +195,35 @@ Ate.unserialization = function(self)
     return  false
 end
 
+local get_redis_key = function(name, addr, tp)
+    return format('cmd:%s:%d:%s', name, addr, tp)
+end
+Ate.get_cmd = function(self, tp, val)
+    if tp ~= 'led' then return nil end
+    local addr = self.addr
+    local cmd = { addr, dev_config.write_key_fun,
+                  0x00, 18, -- 18是地址，表示led灯的使用情况
+                  0x00, val}
+    local crc_list = crc16(cmd)
+    cmd[#cmd + 1] = crc_list[1]
+    cmd[#cmd + 1] = crc_list[2]
+    return cmd
+end
+Ate.get_led_cmd = function(self, val)
+    val = tonumber(val)
+    -- log(ERR, 'GET_LED_CMD', val)
+    return self:get_cmd('led', val)
+end
+Ate.set = function(self, redis, tp, val)
+    local key = get_redis_key(dev_config.name, self.addr, tp)
+    log(ERR, key, ':', tp, ':', val)
+    redis:lpush(key, val)
+end
+-- 通过网operation注册往对应设备下发的命令
+Ate.registe_service = function(self, operation)
+    local ledkey = get_redis_key(dev_config.name, self.addr, 'led')
+    operation.register(ledkey, self, function() return self.get_led_cmd end)
+end
 
 Ate.__tostring = function(self)
     local str = {}
