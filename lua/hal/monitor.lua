@@ -48,7 +48,47 @@ _M.get = function(name)
     return nil
 end
 
-_M.read = function()
+_M.read_input = function()
+    local devs = _M.devs
+    local tasks = {}
+    for i, v in ipairs(devs) do
+        local obj = v.obj
+        local senddata = obj:get_read_cmd()
+        -- log(ERR, util.format_bytes(senddata))
+        if senddata then
+            local host = obj:get_host()
+            local port = obj:get_port()
+            -- log(ERR, host,':', port)
+            -- log(ERR, ins(senddata))
+            local t = spawn(send, host, port, senddata, v.maxsize)
+            tasks[#tasks + 1] = {
+                index = i,
+                t = t
+            }
+        end
+    end
+
+    for _, v in ipairs(tasks) do
+        local t = v.t
+        local index = v.index
+        local obj = devs[index].obj
+        local ok, res = wait(t)
+        if not ok then
+            log(ERR, format('host=%s port=%s fail=%s', obj:host(), obj:port(), res))
+        else
+            if res then
+                res = stringtotable(res)
+                obj:set_data(res)
+                -- log(ERR, ins(res))
+            else
+                obj:fail(ds.DEV_HEALTH_SICK)
+                log(ERR, 'received is nil')
+            end
+        end
+    end
+end
+
+_M.read_hold = function()
     local devs = _M.devs
     local tasks = {}
     for i, v in ipairs(devs) do

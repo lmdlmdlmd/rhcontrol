@@ -1,6 +1,27 @@
 local input_index = 1
 local hold_index = 1
 local _M = {
+    -- input registers
+    INPUT_ADDR_XLW1 = input_index,
+    INPUT_ADDR_XLW2 = input_index + 1,
+    INPUT_ADDR_FPR = input_index + 2,
+    INPUT_ADDR_FAR = input_index + 3,
+    INPUT_ADDR_FAE = input_index + 4,
+    INPUT_ADDR_EAR = input_index + 5,
+    INPUT_ADDR_EAE = input_index + 6,
+    INPUT_ADDR_RAT1 = input_index + 7,
+    INPUT_ADDR_RAH1 = input_index + 8,
+    INPUT_ADDR_FAT1 = input_index + 9,
+    INPUT_ADDR_FAH1 = input_index + 10,
+    INPUT_ADDR_SAT1 = input_index + 11,
+    INPUT_ADDR_SAH1 = input_index + 12,
+    INPUT_ADDR_DHT1 = input_index + 13,
+
+    INPUT_ADDR_HEALTH  = input_index + 14,
+
+    INPUT_ADDR_HEARTBEAT = input_index + 15,
+    INPUT_ADDR_VER = input_index + 16,
+
     -- hold registers
     HOLD_ADDR_DWK = hold_index,
     HOLD_ADDR_JSK = hold_index + 1,
@@ -28,27 +49,6 @@ local _M = {
     HOLD_ADDR_WTS2 = hold_index + 21,
     HOLD_ADDR_WTS3 = hold_index + 22,
     HOLD_ADDR_SYNC = hold_index + 23,
-
-    -- input registers
-    INPUT_ADDR_XLW1 = input_index,
-    INPUT_ADDR_XLW2 = input_index + 1,
-    INPUT_ADDR_FPR = input_index + 2,
-    INPUT_ADDR_FAR = input_index + 3,
-    INPUT_ADDR_FAE = input_index + 4,
-    INPUT_ADDR_EAR = input_index + 5,
-    INPUT_ADDR_EAE = input_index + 6,
-    INPUT_ADDR_RAT1 = input_index + 7,
-    INPUT_ADDR_RAH1 = input_index + 8,
-    INPUT_ADDR_FAT1 = input_index + 9,
-    INPUT_ADDR_FAH1 = input_index + 10,
-    INPUT_ADDR_SAT1 = input_index + 11,
-    INPUT_ADDR_SAH1 = input_index + 12,
-    INPUT_ADDR_DHT1 = input_index + 13,
-
-    INPUT_ADDR_HEALTH  = input_index + 14,
-
-    INPUT_ADDR_HEARTBEAT = input_index + 15,
-    INPUT_ADDR_VER = input_index + 16,
 }
 
 return _M
