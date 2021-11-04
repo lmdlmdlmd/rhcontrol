@@ -28,7 +28,8 @@ _M.init = function()
 end
 
 _M.run = function()
-    monitor.read()
+    monitor.read_input()
+    monitor.read_hold()
 
     local ate = monitor.get('ate')
     -- local fan1 = monitor.get('newfan1')

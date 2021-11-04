@@ -93,7 +93,10 @@ _M.read_hold = function()
     local tasks = {}
     for i, v in ipairs(devs) do
         local obj = v.obj
-        local senddata = obj:get_read_cmd()
+        if not obj.get_hold_cmd then
+            goto continereadhold
+        end
+        local senddata = obj:get_hold_cmd()
         -- log(ERR, util.format_bytes(senddata))
         if senddata then
             local host = obj:get_host()
@@ -101,11 +104,9 @@ _M.read_hold = function()
             -- log(ERR, host,':', port)
             -- log(ERR, ins(senddata))
             local t = spawn(send, host, port, senddata, v.maxsize)
-            tasks[#tasks + 1] = {
-                index = i,
-                t = t
-            }
+            tasks[#tasks + 1] = { index = i, t = t }
         end
+        ::continereadhold::
     end
 
     for _, v in ipairs(tasks) do
@@ -118,7 +119,7 @@ _M.read_hold = function()
         else
             if res then
                 res = stringtotable(res)
-                obj:set_data(res)
+                obj:set_data(res, 0, 'hold')
                 -- log(ERR, ins(res))
             else
                 obj:fail(ds.DEV_HEALTH_SICK)

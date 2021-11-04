@@ -75,6 +75,10 @@ function Newfan.get_read_cmd(self, tp)
     return cmd
 end
 
+Newfan.get_hold_cmd = function(self)
+    return self:get_read_cmd("hold")
+end
+
 Newfan.set_data = function(self, newdata, start, tp)
     if not (newdata and type(newdata) == 'table') then
         return nil

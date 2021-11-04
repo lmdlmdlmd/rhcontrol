@@ -13,7 +13,10 @@ check = function(premature)
    if not premature then
        for _, f in ipairs(tasks) do
            -- log(ERR, ngx.time())
-           xpcall(f.run, debug.traceback)
+           local status, err = xpcall(f.run, debug.traceback)
+           if not status and err then
+               log(ERR, err)
+           end
        end
        local ok, err = new_timer(delay, check)
        if not ok then
