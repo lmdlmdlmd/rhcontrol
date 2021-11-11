@@ -7,9 +7,10 @@ local Aircond = require 'dev.aircond'
 local Air = require 'lib.air'
 local operation = require 'hal.operation'
 local hex = require 'lib.util'.hex
+local helprd  = require "lib.helpredis"
 
-local HOST = '192.168.254.7'
--- local HOST = '127.0.0.1'
+-- local HOST = '192.168.254.7'
+local HOST = '192.168.0.7'
 
 local log = ngx.log
 local ERR = ngx.ERR
@@ -30,9 +31,10 @@ _M.init = function()
     air1:registe_service(operation)
 end
 
+local wifi = 0
 _M.run = function()
-    -- monitor.read_input()
-    -- monitor.read_hold()
+    monitor.read_input()
+    monitor.read_hold()
 
     local ate = monitor.get('ate')
     local fan1 = monitor.get('newfan1')
@@ -50,26 +52,39 @@ _M.run = function()
         log(DBG, 'humi is:', home_humi)
         log(DBG, 'pm25 is:', home_pm25)
         log(DBG, '19 is:', home_19)
+
+        local redis = helprd.get()
+        ate:set(redis, 18, wifi)
+        if wifi == 0 then
+            wifi = 1
+        else
+            wifi = 0
+        end
     end
 
-    -- if fan1 then
-    --     log(DBG, 'XLW1:', fan1:get(Fan.INPUT_ADDR_XLW1))
-    --     log(DBG, 'HEALTH:', hex(fan1:get(Fan.INPUT_ADDR_HEALTH)))
-    --     log(DBG, 'VER:', hex(fan1:get(Fan.INPUT_ADDR_VER)))
-    --     log(DBG, 'DHT1:', fan1:get(Fan.INPUT_ADDR_DHT1))
-    --     log(DBG, 'RAT1:', fan1:get(Fan.INPUT_ADDR_RAT1))
-    --     log(DBG, 'RAH1:', fan1:get(Fan.INPUT_ADDR_RAH1))
-    --     log(DBG, 'FAT1:', fan1:get(Fan.INPUT_ADDR_FAT1))
-    --
-    --     log(DBG, 'SYNC:', hex(fan1:get_hold(Fan.HOLD_ADDR_SYNC)))
-    --     log(DBG, 'JSK:', fan1:get_hold(Fan.HOLD_ADDR_JSK))
-    --     log(DBG, 'DWK:', fan1:get_hold(Fan.HOLD_ADDR_DWK))
-    --     log(DBG, 'H9:', fan1:get_hold(Fan.HOLD_ADDR_H9))
-    -- end
+    if fan1 then
+        log(DBG, 'XLW1:', fan1:get(Fan.INPUT_ADDR_XLW1))
+        log(DBG, 'HEALTH:', hex(fan1:get(Fan.INPUT_ADDR_HEALTH)))
+        log(DBG, 'VER:', hex(fan1:get(Fan.INPUT_ADDR_VER)))
+        log(DBG, 'DHT1:', fan1:get(Fan.INPUT_ADDR_DHT1))
+        log(DBG, 'RAT1:', fan1:get(Fan.INPUT_ADDR_RAT1))
+        log(DBG, 'RAH1:', fan1:get(Fan.INPUT_ADDR_RAH1))
+        log(DBG, 'FAT1:', fan1:get(Fan.INPUT_ADDR_FAT1))
+
+        log(DBG, 'SYNC:', hex(fan1:get_hold(Fan.HOLD_ADDR_SYNC)))
+        log(DBG, 'JSK:', fan1:get_hold(Fan.HOLD_ADDR_JSK))
+        log(DBG, 'DWK:', fan1:get_hold(Fan.HOLD_ADDR_DWK))
+        log(DBG, 'H9:', fan1:get_hold(Fan.HOLD_ADDR_H9))
+    end
+
+    if air1 then
+        log(DBG, 'spo1:', air1:get_hold(Air.HOLD_ADDR_SPO1))
+    end
 
     operation.write()
-    -- log(ERR, ate)
-    -- log(ERR, fan1)
+
+    log(ERR, ate)
+    log(ERR, fan1)
     log(ERR, air1)
 end
 

@@ -2,14 +2,17 @@ local ds    = require "lib.ds"
 local crc16 = require "lib.crc16"
 local util  = require "lib.util"
 local Air   = require "lib.air"
+local Task  = require "lib.task"
 local bit   = require "bit"
+
 local format = string.format
 local lshift = bit.lshift
+local format_bytes = util.format_bytes
 
 local log = ngx.log
 local ERR = ngx.ERR
-local DBG = ngx.DEBUG
-local ins = require 'lib.inspect'
+-- local DBG = ngx.DEBUG
+-- local ins = require 'lib.inspect'
 
 local Aircond = {}
 Aircond.__index = Aircond
@@ -110,13 +113,16 @@ Aircond.get_port = function(self)
     return self.port
 end
 
-local get = function(self, index)
-  local data = self.data
-  local nindex = 3 + (index * 2)
-  if self.health ~= ds.DEV_HEALTH_OFFLINE then
+local get = function(self, data, index)
+    if not data then return nil end
+    local nindex = 3 + (index * 2)
+    if nindex > #data then
+      return nil
+    end
+    if self.health ~= ds.DEV_HEALTH_OFFLINE then
       return lshift(data[nindex - 1], 8) + data[nindex]
-  end
-  return nil
+    end
+    return nil
 end
 
 Aircond.get = function(self, index)
@@ -129,9 +135,6 @@ Aircond.get_hold = function(self, index)
     return get(self, data, index)
 end
 
-local get_redis_key = function(name, addr, tp)
-    return format('cmd:%s:%d:%s', name, addr, tp)
-end
 Aircond.get_cmd = function(self, index, val)
     -- tp is address
     index = tonumber(index)
@@ -144,28 +147,24 @@ Aircond.get_cmd = function(self, index, val)
     cmd[#cmd + 1] = crc_list[2]
     return cmd
 end
-Aircond.get_spo1_cmd = function(self, val)
-    val = tonumber(val)
-    -- log(ERR, 'GET_LED_CMD', val)
-    return self:get_cmd(Air.HOLD_ADDR_SPO1, val)
-end
 
 Aircond.set = function(self, redis, tp, val)
-    local key = get_redis_key(dev_config.name, self.addr, tp)
-    log(ERR, key, ':', tp, ':', val)
+    local key = Task.get_redis_key(dev_config.name, self.addr, tp)
+    log(ERR, key, ':', val)
     redis:lpush(key, val)
 end
 -- 通过网operation注册往对应设备下发的命令
 Aircond.registe_service = function(self, operation)
-    local ledkey = get_redis_key(dev_config.name, self.addr, 'spo1')
-    operation.register(ledkey, self, function() return self.get_spo1_cmd end)
+    local pfun = function() return self.get_cmd end
+    local ledkey = Task.get_redis_key(dev_config.name, self.addr, Air.HOLD_ADDR_SPO1)
+    operation.register(ledkey, self, Air.HOLD_ADDR_SPO1, pfun)
 end
 
 Aircond.__tostring = function(self)
     local str = {}
     str[#str + 1] = format('aircond:%d, health=%d', self.addr, self.health)
-    str[#str + 1] = format('input_data: %s', util.format_bytes(self.input_data))
-    str[#str + 1] = format('hold_data: %s', util.format_bytes(self.hold_data))
+    str[#str + 1] = format('input_data: %s', format_bytes(self.input_data))
+    str[#str + 1] = format('hold_data: %s', format_bytes(self.hold_data))
     return table.concat(str, "\r\n")
 end
 

@@ -3,13 +3,15 @@ local crc16 = require "lib.crc16"
 local util  = require "lib.util"
 local bit   = require "bit"
 local Fan   = require "lib.fan"
+local Task  = require "lib.task"
 local format = string.format
 local lshift = bit.lshift
+local format_bytes = util.format_bytes
 
 local log = ngx.log
 local ERR = ngx.ERR
-local DBG = ngx.DEBUG
-local ins = require 'lib.inspect'
+-- local DBG = ngx.DEBUG
+-- local ins = require 'lib.inspect'
 
 local Newfan = {}
 Newfan.__index = Newfan
@@ -139,9 +141,6 @@ Newfan.get_hold = function(self, index)
     return get(self, data, index)
 end
 
-local get_redis_key = function(name, addr, tp)
-    return format('cmd:%s:%d:%s', name, addr, tp)
-end
 Newfan.get_cmd = function(self, index, val)
     -- tp is address
     index = tonumber(index)
@@ -154,34 +153,26 @@ Newfan.get_cmd = function(self, index, val)
     cmd[#cmd + 1] = crc_list[2]
     return cmd
 end
-Newfan.get_fax_cmd = function(self, val)
-    val = tonumber(val)
-    -- log(ERR, 'GET_LED_CMD', val)
-    return self:get_cmd(Fan.HOLD_ADDR_FAX, val)
-end
-Newfan.get_fak_cmd = function(self, val)
-    val = tonumber(val)
-    return self:get_cmd(Fan.HOLD_ADDR_FAK, val)
-end
 
-Newfan.set = function(self, redis, tp, val)
-    local key = get_redis_key(dev_config.name, self.addr, tp)
-    log(ERR, key, ':', tp, ':', val)
+Newfan.set = function(self, redis, index, val)
+    local key = Task.get_redis_key(dev_config.name, self.addr, index)
+    log(ERR, key, ':', index, ':', val)
     redis:lpush(key, val)
 end
 -- 通过网operation注册往对应设备下发的命令
 Newfan.registe_service = function(self, operation)
-    local ledkey = get_redis_key(dev_config.name, self.addr, 'fax')
-    operation.register(ledkey, self, function() return self.get_fax_cmd end)
-    ledkey = get_redis_key(dev_config.name, self.addr, 'fak')
-    operation.register(ledkey, self, function() return self.get_fak_cmd end)
+    local taskkey = Task.get_redis_key(dev_config.name, self.addr, Fan.HOLD_ADDR_FAX)
+    local pfun = function() return self.get_cmd end
+    operation.register(taskkey, self, Fan.HOLD_ADDR_FAX, pfun)
+    taskkey = Task.get_redis_key(dev_config.name, self.addr, Fan.HOLD_ADDR_FAK)
+    operation.register(taskkey, self, Fan.HOLD_ADDR_FAK, pfun)
 end
 
 Newfan.__tostring = function(self)
     local str = {}
     str[#str + 1] = format('newfan:%d, health=%d', self.addr, self.health)
-    str[#str + 1] = format('input_data: %s', util.format_bytes(self.input_data))
-    str[#str + 1] = format('hold_data: %s', util.format_bytes(self.hold_data))
+    str[#str + 1] = format('input_data: %s', format_bytes(self.input_data))
+    str[#str + 1] = format('hold_data: %s', format_bytes(self.hold_data))
     return table.concat(str, "\r\n")
 end
 

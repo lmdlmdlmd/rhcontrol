@@ -4,9 +4,11 @@ local util  = require "lib.util"
 local bit   = require "bit"
 local helprd = require "lib.helpredis"
 local cjson  = require "cjson.safe"
+local Task  = require "lib.task"
 
 local format = string.format
 local lshift = bit.lshift
+local format_bytes = util.format_bytes
 
 local log = ngx.log
 local ERR = ngx.ERR
@@ -195,41 +197,35 @@ Ate.unserialization = function(self)
     return  false
 end
 
-local get_redis_key = function(name, addr, tp)
-    return format('cmd:%s:%d:%s', name, addr, tp)
-end
-Ate.get_cmd = function(self, tp, val)
-    if tp ~= 'led' then return nil end
+Ate.get_cmd = function(self, index, val)
     local addr = self.addr
     local cmd = { addr, dev_config.write_key_fun,
-                  0x00, 18, -- 18是地址，表示led灯的使用情况
+                  0x00, index,
                   0x00, val}
     local crc_list = crc16(cmd)
     cmd[#cmd + 1] = crc_list[1]
     cmd[#cmd + 1] = crc_list[2]
     return cmd
 end
-Ate.get_led_cmd = function(self, val)
-    val = tonumber(val)
-    -- log(ERR, 'GET_LED_CMD', val)
-    return self:get_cmd('led', val)
-end
-Ate.set = function(self, redis, tp, val)
-    local key = get_redis_key(dev_config.name, self.addr, tp)
-    log(ERR, key, ':', tp, ':', val)
+
+Ate.set = function(self, redis, index, val)
+    local key = Task.get_redis_key(dev_config.name, self.addr, index)
+    log(ERR, key, ':', index, ':', val)
     redis:lpush(key, val)
 end
+
 -- 通过网operation注册往对应设备下发的命令
 Ate.registe_service = function(self, operation)
-    local ledkey = get_redis_key(dev_config.name, self.addr, 'led')
-    operation.register(ledkey, self, function() return self.get_led_cmd end)
+    local index = 18 -- 18是地址，表示led灯的使用情况
+    local ledkey = Task.get_redis_key(dev_config.name, self.addr, index)
+    operation.register(ledkey, self, index, function() return self.get_cmd end)
 end
 
 Ate.__tostring = function(self)
     local str = {}
     str[#str + 1] = format('ate:%d, health=%d', self.addr, self.health)
-    str[#str + 1] = format('data: %s', util.format_bytes(self.data))
-    str[#str + 1] = format('led: %d', get(self, 19))
+    str[#str + 1] = format('data: %s', format_bytes(self.data))
+    str[#str + 1] = format('led: %s', get(self, 19) or 'nil')
     return table.concat(str, "\r\n")
 end
 

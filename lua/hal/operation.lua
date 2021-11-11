@@ -18,7 +18,7 @@ local _M = {
     queue = {}
 }
 
-_M.register = function(task, dev, func)
+_M.register = function(task, dev, index, func)
     if task and func
       and type(task) == 'string'
       and type(func) == 'function' then
@@ -26,7 +26,8 @@ _M.register = function(task, dev, func)
         queue[#queue + 1] = {
             name = task,
             obj = dev,
-            func = func
+            func = func,
+            index = index
         }
         return #queue
     end
@@ -49,9 +50,9 @@ _M.write = function()
             goto continuewrite
         end
         log(ERR, '**************')
-        log(ERR, v.name, val)
+        log(ERR, v.name, ':', val)
         -- log(ERR, ins(v.func))
-        local senddata = v.func()(obj, val)
+        local senddata = v.func()(obj, v.index, val)
         log(ERR, format_bytes(senddata))
         if senddata then
             local host = obj:get_host()
