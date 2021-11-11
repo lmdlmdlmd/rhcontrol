@@ -1,14 +1,15 @@
 local ds    = require "lib.ds"
 local crc16 = require "lib.crc16"
 local util  = require "lib.util"
--- local bit   = require "bit"
+local Air   = require "lib.air"
+local bit   = require "bit"
 local format = string.format
--- local lshift = bit.lshift
+local lshift = bit.lshift
 
--- local log = ngx.log
--- local ERR = ngx.ERR
--- local DBG = ngx.DEBUG
--- local ins = require 'lib.inspect'
+local log = ngx.log
+local ERR = ngx.ERR
+local DBG = ngx.DEBUG
+local ins = require 'lib.inspect'
 
 local Aircond = {}
 Aircond.__index = Aircond
@@ -25,7 +26,8 @@ local dev_config = {
         max_len = 20
     },
     write_key_fun = 0x06,
-    max_sick_to_offline = 4
+    max_sick_to_offline = 4,
+    name = 'aircond'
 }
 
 function Aircond.new(addr, host, port)
@@ -71,7 +73,6 @@ function Aircond.get_read_cmd(self, tp)
     return cmd
 end
 
-
 Aircond.set_data = function(self, newdata, start, tp)
     if not (newdata and type(newdata) == 'table') then
         return nil
@@ -109,19 +110,62 @@ Aircond.get_port = function(self)
     return self.port
 end
 
--- local get = function(self, index)
---   local data = self.data
---   local nindex = 3 + (index * 2)
---   if self.health ~= ds.DEV_HEALTH_OFFLINE then
---       return lshift(data[nindex - 1], 8) + data[nindex]
---   end
---   return nil
--- end
+local get = function(self, index)
+  local data = self.data
+  local nindex = 3 + (index * 2)
+  if self.health ~= ds.DEV_HEALTH_OFFLINE then
+      return lshift(data[nindex - 1], 8) + data[nindex]
+  end
+  return nil
+end
+
+Aircond.get = function(self, index)
+    local data = self.input_data
+    return get(self, data, index)
+end
+
+Aircond.get_hold = function(self, index)
+    local data = self.hold_data
+    return get(self, data, index)
+end
+
+local get_redis_key = function(name, addr, tp)
+    return format('cmd:%s:%d:%s', name, addr, tp)
+end
+Aircond.get_cmd = function(self, index, val)
+    -- tp is address
+    index = tonumber(index)
+    local addr = self.addr
+    local cmd = { addr, dev_config.write_key_fun,
+                  0x00, index,
+                  0x00, val}
+    local crc_list = crc16(cmd)
+    cmd[#cmd + 1] = crc_list[1]
+    cmd[#cmd + 1] = crc_list[2]
+    return cmd
+end
+Aircond.get_spo1_cmd = function(self, val)
+    val = tonumber(val)
+    -- log(ERR, 'GET_LED_CMD', val)
+    return self:get_cmd(Air.HOLD_ADDR_SPO1, val)
+end
+
+Aircond.set = function(self, redis, tp, val)
+    local key = get_redis_key(dev_config.name, self.addr, tp)
+    log(ERR, key, ':', tp, ':', val)
+    redis:lpush(key, val)
+end
+-- 通过网operation注册往对应设备下发的命令
+Aircond.registe_service = function(self, operation)
+    local ledkey = get_redis_key(dev_config.name, self.addr, 'spo1')
+    operation.register(ledkey, self, function() return self.get_spo1_cmd end)
+end
 
 Aircond.__tostring = function(self)
     local str = {}
     str[#str + 1] = format('aircond:%d, health=%d', self.addr, self.health)
-    str[#str + 1] = format('data: %s', util.format_bytes(self.data))
+    str[#str + 1] = format('input_data: %s', util.format_bytes(self.input_data))
+    str[#str + 1] = format('hold_data: %s', util.format_bytes(self.hold_data))
     return table.concat(str, "\r\n")
 end
 

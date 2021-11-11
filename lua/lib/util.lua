@@ -22,4 +22,9 @@ _M.stringtotable = function(str)
     return ret
 end
 
+_M.hex = function(v)
+  if not v then return nil end
+  return format('0x%02X', v)
+end
+
 return _M
