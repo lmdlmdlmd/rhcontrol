@@ -156,16 +156,16 @@ end
 
 Newfan.set = function(self, redis, index, val)
     local key = Task.get_redis_key(dev_config.name, self.addr, index)
-    log(ERR, key, ':', index, ':', val)
+    -- log(ERR, key, ':', index, ':', val)
     redis:lpush(key, val)
 end
 -- 通过网operation注册往对应设备下发的命令
 Newfan.registe_service = function(self, operation)
-    local taskkey = Task.get_redis_key(dev_config.name, self.addr, Fan.HOLD_ADDR_FAX)
     local pfun = function() return self.get_cmd end
-    operation.register(taskkey, self, Fan.HOLD_ADDR_FAX, pfun)
-    taskkey = Task.get_redis_key(dev_config.name, self.addr, Fan.HOLD_ADDR_FAK)
-    operation.register(taskkey, self, Fan.HOLD_ADDR_FAK, pfun)
+    for i = Fan.HOLD_ADDR_DWK, Fan.HOLD_ADDR_SYNC, 1 do
+        local taskkey = Task.get_redis_key(dev_config.name, self.addr, i)
+        operation.register(taskkey, self, i, pfun)
+    end
 end
 
 Newfan.__tostring = function(self)

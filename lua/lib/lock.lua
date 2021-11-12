@@ -5,8 +5,8 @@ local DBG  = ngx.DEBUG
 
 local LOCKBUFFER = 'lmdlock'
 _M.lock = function( resource, exptime, timeout)
-    exptime = exptime or 30
-    timeout = timeout or 5
+    exptime = exptime or 120
+    timeout = timeout or 60
     local lock_obj, err = resty_lock:new(LOCKBUFFER, {exptime = exptime, timeout = timeout})
     if not lock_obj then
         log(DBG, "failed to create lock: ", err, ",", resource)

@@ -47,13 +47,14 @@ _M.write = function()
         local val = redis:rpop(v.name)
         local obj = v.obj
         if val == nil then
+            -- log(ERR, v.name, ' val is null')
             goto continuewrite
         end
-        log(ERR, '**************')
-        log(ERR, v.name, ':', val)
+        -- log(ERR, '**************')
+        -- log(ERR, v.name, ':', val)
         -- log(ERR, ins(v.func))
         local senddata = v.func()(obj, v.index, val)
-        log(ERR, format_bytes(senddata))
+        -- log(ERR, format_bytes(senddata))
         if senddata then
             local host = obj:get_host()
             local port = obj:get_port()

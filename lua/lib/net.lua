@@ -3,7 +3,7 @@ local util = require 'lib.util'
 local lock  = require 'lib.lock'
 -- local bit = require 'bit'
 
-local KEEPALIVE_TIMEOUT = 1000 * 5 --5 seconds
+local KEEPALIVE_TIMEOUT = 1000 * 60 * 5 --5 mins
 local format = string.format
 local format_bytes = util.format_bytes
 
@@ -49,7 +49,7 @@ _M.send = function(host, port, data, maxreadsize)
             log(ERR, 'connect send:', ins(err))
             goto sendexit
         else
-            log(DBG, 'sending ok:', host, ':', port, '=', format_bytes(data), ',len=', bytes)
+            -- log(DBG, 'sending ok:', host, ':', port, '=', format_bytes(data), ',len=', bytes)
         end
         -- sock:settimeouts(10000,10000,10000)
         maxreadsize = maxreadsize or 1024
