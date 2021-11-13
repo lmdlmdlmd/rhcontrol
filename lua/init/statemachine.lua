@@ -73,6 +73,8 @@ _M.run = function()
         log(DBG, 'RAT1:', fan1:get(Fan.INPUT_ADDR_RAT1))
         log(DBG, 'RAH1:', fan1:get(Fan.INPUT_ADDR_RAH1))
         log(DBG, 'FAT1:', fan1:get(Fan.INPUT_ADDR_FAT1))
+        log(DBG, 'XLW1:', fan1:get(Fan.INPUT_ADDR_XLW1))
+        log(DBG, 'XLW2:', fan1:get(Fan.INPUT_ADDR_XLW2))
 
         log(DBG, 'SYNC:', hex(fan1:get_hold(Fan.HOLD_ADDR_SYNC)))
         log(DBG, 'JSK:', fan1:get_hold(Fan.HOLD_ADDR_JSK))

@@ -121,6 +121,7 @@ Newfan.get_port = function(self)
 end
 
 local get = function(self, data, index)
+  index = index + 1
   local nindex = 3 + (index * 2)
   if nindex > #data then
       return nil
