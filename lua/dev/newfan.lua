@@ -4,6 +4,8 @@ local util  = require "lib.util"
 local bit   = require "bit"
 local Fan   = require "lib.fan"
 local Task  = require "lib.task"
+local cjson  = require "cjson.safe"
+local helprd = require "lib.helpredis"
 local format = string.format
 local lshift = bit.lshift
 local format_bytes = util.format_bytes
@@ -98,15 +100,22 @@ Newfan.set_data = function(self, newdata, start, tp)
         data[i + start] = v
         -- log(ERR, i+start, '=', v)
     end
+    Newfan.serialization(self)
     return true
 end
 
 Newfan.fail = function(self, code)
     self.sick_count = self.sick_count + 1
+    local old_health = self.health
     if self.sick_count > dev_config.max_sick_to_offline then
         self.health = ds.DEV_HEALTH_OFFLINE
     else
         self.health = code
+    end
+
+    -- 如果值不一样，则序列化
+    if old_health ~= self.health then
+        Newfan.serialization(self)
     end
 end
 
@@ -167,6 +176,46 @@ Newfan.registe_service = function(self, operation)
         local taskkey = Task.get_redis_key(dev_config.name, self.addr, i)
         operation.register(taskkey, self, i, pfun)
     end
+end
+
+local get_key = function(name, addr)
+    return format('%s:%d', name, addr)
+end
+
+Newfan.serialization = function(self)
+    local d = {
+        input_data = self.input_data,
+        hold_data  = self.hold_data,
+        health = self.health,
+        sick_count = self.sick_count,
+        ts = ngx.time()
+    }
+    local key = get_key(dev_config.name, self.addr)
+    local d_str = cjson.encode(d)
+    -- log(ERR, d_str)
+    local redis = helprd.get()
+    redis:set(key, d_str)
+    return  true
+end
+
+Newfan.unserialization = function(self)
+    local key = get_key(dev_config.name, self.addr)
+    -- local d_str = cjson.encode(d)
+    local redis = helprd.get()
+    local d_str = redis:get(key)
+    -- log(ERR, d_str)
+    if d_str then
+        local d = cjson.decode(d_str)
+        if d then
+            self.input_data = d.input_data
+            self.hold_data = d.hold_data
+            self.health = d.health
+            self.sick_count = d.sick_count
+            self.ts = d.ts
+            return  true
+        end
+    end
+    return  false
 end
 
 Newfan.__tostring = function(self)
