@@ -1,6 +1,3 @@
-local base_input_index = 2
-local base_hold_index  = 1
-
 -- 0x01,0x04,0x28,
 -- 0x00,0x00,
 -- 0x00,0x01, SPR1
@@ -22,36 +19,45 @@ local base_hold_index  = 1
 -- 0x00,0x00,0x00,0x00,0x00,0x00,0xEA,0x04
 
 local _M = {
-  INPUT_ADDR_SPR1 = base_input_index,
-  INPUT_ADDR_SPE1 = base_input_index + 1,
-  INPUT_ADDR_SPR2 = base_input_index + 2,
-  INPUT_ADDR_SPE2 = base_input_index + 3,
-  INPUT_ADDR_HPE  = base_input_index + 4,
-  INPUT_ADDR_HW_ID1 = base_input_index + 5,
-  INPUT_ADDR_HW_ID2 = base_input_index + 6,
+  INPUT_ADDR_VER = 0,
+  INPUT_ADDR_SPR1 = 1,
+  INPUT_ADDR_SPE1 = 2,
+  INPUT_ADDR_SPR2 = 3,
+  INPUT_ADDR_SPE2 = 4,
+  INPUT_ADDR_HPE  = 5,
+  INPUT_ADDR_HW_ID1 = 6,
+  INPUT_ADDR_HW_ID2 = 7,
+  INPUT_ADDR_RAT1 = 8,
+  INPUT_ADDR_RAH1 = 9,
+  INPUT_ADDR_FAT1 = 10,
+  INUT_ADDR_FAH1 = 11,
+  INPUT_ADDR_SAT1 = 12,
+  INPUT_ADDR_SAH1 = 13,
+  INPUT_ADDR_ST1 = 14,
+  INPUT_ADDR_HT1 = 15,
+  INPUT_ADDR_HEALTH = 16,
+  INPUT_ADDR_HEARTBEAT = 17,
 
-  INPUT_ADDR_HEALTH = base_input_index + 7,
-  INPUT_ADDR_HEARTBEAT = base_input_index + 8,
-  INPUT_ADDR_VER = base_input_index + 9,
-
-
-  HOLD_ADDR_SPO1 = base_hold_index,
-  HOLD_ADDR_SPK1 = base_hold_index + 1,
-  HOLD_ADDR_SPO2 = base_hold_index + 1,
-  HOLD_ADDR_SPE2 = base_hold_index + 1,
-  HOLD_ADDR_MC1K = base_hold_index + 1,
-  HOLD_ADDR_MC2K = base_hold_index + 1,
-  HOLD_ADDR_CMV  = base_hold_index + 1,
-  HOLD_ADDR_HMV  = base_hold_index + 1,
-  HOLD_ADDR_HPK  = base_hold_index + 1,
-  HOLD_ADDR_HPO  = base_hold_index + 1,
-  HOLD_ADDR_HBK  = base_hold_index + 1,
-  HOLD_ADDR_PF1  = base_hold_index + 1,
-  HOLD_ADDR_PF1K = base_hold_index + 1,
-  HOLD_ADDR_PF2  = base_hold_index + 1,
-  HOLD_ADDR_PF2K = base_hold_index + 1,
-  HOLD_ADDR_PF3  = base_hold_index + 1,
-  HOLD_ADDR_PF3K = base_hold_index + 1,
+  HOLD_ADDR_TEST = 0,
+  HOLD_ADDR_SPO1 = 1,
+  HOLD_ADDR_SPK1 = 2,
+  HOLD_ADDR_SPO2 = 3,
+  HOLD_ADDR_SPE2 = 4,
+  HOLD_ADDR_MC1K = 5,
+  HOLD_ADDR_MC2K = 6,
+  HOLD_ADDR_CMV  = 7,
+  HOLD_ADDR_HMV  = 8,
+  HOLD_ADDR_HPK  = 9,
+  HOLD_ADDR_HPO  = 10,
+  HOLD_ADDR_HBK  = 11,
+  HOLD_ADDR_PF1  = 12,
+  HOLD_ADDR_PF1K = 13,
+  HOLD_ADDR_PF2  = 14,
+  HOLD_ADDR_PF2K = 15,
+  HOLD_ADDR_PF3  = 16,
+  HOLD_ADDR_PF3K = 17,
+  HOLD_ADDR_MODE = 18,
+  HOLD_ADDR_SYNC = 19
 }
 
 return _M

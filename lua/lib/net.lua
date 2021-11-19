@@ -1,15 +1,15 @@
 local _M = {}
-local util = require 'lib.util'
+-- local util = require 'lib.util'
 local lock  = require 'lib.lock'
 -- local bit = require 'bit'
 
 local KEEPALIVE_TIMEOUT = 1000 * 60 * 5 --5 mins
 local format = string.format
-local format_bytes = util.format_bytes
+-- local format_bytes = util.format_bytes
 
 local log = ngx.log
 local ERR = ngx.ERR
-local DBG = ngx.DEBUG
+-- local DBG = ngx.DEBUG
 local ins = require 'lib.inspect'
 
 -- assume data is only bytes data
@@ -32,7 +32,8 @@ end
 
 _M.send = function(host, port, data, maxreadsize)
     local sock = ngx.socket.tcp()
-    local err, ok, bytes, readdata
+    local err, ok, readdata
+    local bytes -- luacheck: ignore
 
     local lockname = format('hp:%s:%s', host, port)
     local mylock = lock.lock(lockname)
@@ -48,7 +49,7 @@ _M.send = function(host, port, data, maxreadsize)
         if err then
             log(ERR, 'connect send:', ins(err))
             goto sendexit
-        else
+        -- else
             -- log(DBG, 'sending ok:', host, ':', port, '=', format_bytes(data), ',len=', bytes)
         end
         -- sock:settimeouts(10000,10000,10000)

@@ -76,6 +76,10 @@ function Aircond.get_read_cmd(self, tp)
     return cmd
 end
 
+Aircond.get_hold_cmd = function(self)
+    return self:get_read_cmd("hold")
+end
+
 Aircond.set_data = function(self, newdata, start, tp)
     if not (newdata and type(newdata) == 'table') then
         return nil
@@ -115,6 +119,7 @@ end
 
 local get = function(self, data, index)
     if not data then return nil end
+    index = index + 1
     local nindex = 3 + (index * 2)
     if nindex > #data then
       return nil
@@ -156,8 +161,10 @@ end
 -- 通过网operation注册往对应设备下发的命令
 Aircond.registe_service = function(self, operation)
     local pfun = function() return self.get_cmd end
-    local ledkey = Task.get_redis_key(dev_config.name, self.addr, Air.HOLD_ADDR_SPO1)
-    operation.register(ledkey, self, Air.HOLD_ADDR_SPO1, pfun)
+    for i = Air.HOLD_ADDR_TEST, Air.HOLD_ADDR_SYNC, 1 do
+        local taskkey = Task.get_redis_key(dev_config.name, self.addr, i)
+        operation.register(taskkey, self, i, pfun)
+    end
 end
 
 Aircond.__tostring = function(self)

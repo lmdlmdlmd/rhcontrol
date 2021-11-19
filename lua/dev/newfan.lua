@@ -8,8 +8,8 @@ local format = string.format
 local lshift = bit.lshift
 local format_bytes = util.format_bytes
 
-local log = ngx.log
-local ERR = ngx.ERR
+-- local log = ngx.log
+-- local ERR = ngx.ERR
 -- local DBG = ngx.DEBUG
 -- local ins = require 'lib.inspect'
 
@@ -163,7 +163,7 @@ end
 -- 通过网operation注册往对应设备下发的命令
 Newfan.registe_service = function(self, operation)
     local pfun = function() return self.get_cmd end
-    for i = Fan.HOLD_ADDR_DWK, Fan.HOLD_ADDR_SYNC, 1 do
+    for i = Fan.HOLD_ADDR_TEST, Fan.HOLD_ADDR_SYNC, 1 do
         local taskkey = Task.get_redis_key(dev_config.name, self.addr, i)
         operation.register(taskkey, self, i, pfun)
     end
