@@ -1,0 +1,128 @@
+
+
+If  （新风除湿） then
+  Do
+     打开新风机
+     冷源主机启动
+     除湿逻辑
+
+
+
+//打开新风机
+
+
+If 新风机通电 then
+  Do
+    FAK=1（风机打开）
+    FAV=1（风阀打开）
+  //DHV=1（水阀打开）
+    等待启动时间（比如1分钟）
+    If  FAR=0（运行状态） then
+      Do
+        新风机打开
+    Else
+      if FAE=1（故障状态）then
+        Do
+          输出显示新风机故障
+      Else
+        等待启动时间（等待1分钟）
+        If FAR=0（运行状态） then
+          Do
+            新风机打开
+        Else
+          输出新风机启动超时，发生未知异常
+
+
+
+
+//过滤网堵塞报警
+
+If  XLW1=1（初效过滤网压差开关开启）  then
+  Do
+    报警提示XLW1堵塞
+If  XLW2=1（高效过滤网压差开关开启）  then
+  Do
+    报警提示XLW2堵塞
+
+
+
+
+//除湿主机（冷源主机）启动
+
+If  打开新风主机  then
+  Do
+    If 新风HW_ID=0 then
+      Do
+        向集控器发送请求开共用主机的信号
+        If 主机的HW_ID=00或11  then
+          Do
+            主机不共用或主板硬件ID错误
+        Else
+          If  HW_ID=01  then
+            Do
+              MC1K=1（开空调主机1）
+          Else
+            If  HW_ID=10  then
+              Do
+                MC2K=1（开空调主机2）
+            Else 主机不共用或主板硬件ID错误
+    Else  DWK=1（打开新风主机）
+
+
+
+
+//关闭除湿主机
+
+If 关闭新风主机 then
+  Do
+    If 新风HW_ID=0 then
+      Do
+        向集控器发送请求关共用主机的信号
+        If 主机的HW_ID=00或11  then
+          Do
+            主机不共用或主板硬件ID错误
+        Else
+          If  HW_ID=01  then
+            Do
+              If  MC1K=1（开空调主机1） then
+                Do
+                  MC1K=1（开空调主机1）
+              Else  MC1K=0（关空调主机1）
+          Else
+            If  HW_ID=10  then
+              Do
+                If  MC2K=1（开空调主机2）then
+                  Do
+                    MC2K=1（开空调主机2）
+                Else  MC2K=0（关空调主机2）
+    Else  DWK=0（关新风主机）
+
+
+
+//除湿逻辑
+
+For （新风机启动）
+  {
+  For（ If  RAH01（回风湿度）>=RAHS01（设定湿度） ）
+     {
+      DWK=1 开启除湿主机（引用前面除湿主机）
+      For（DHT1（盘管温度）<DHST1（设定的盘管保护温度））
+         {
+           盘管保护，DWK=0（关闭除湿主机） DHV=0（关闭新风水阀）
+         }
+       For（ RAH01(回风湿度) - RAHS01（设定湿度）>=H9(预设高风险湿度偏差值，暂定为30%)）
+         { 高风险湿度，FAV=0（关闭风阀）
+           For（RAH01(回风湿度) - RAHS01（设定湿度）<H8(预设高风险湿度偏差值，暂定为10%)）
+             {
+              湿度降低，FAV=1（打开风阀）
+              For（RAH01（回风湿度）<RAHS01（设定湿度））
+                 {
+                  除湿完成DWK=0（关闭除湿主机）
+                  break
+                  }
+               break
+              }
+           break
+         }
+     }
+  }

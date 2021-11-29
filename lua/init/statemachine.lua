@@ -1,20 +1,25 @@
 local _M = {}
 local monitor = require 'hal.monitor'
+local l = require 'lib.log'
 local Ate = require 'dev.ate'
 local Newfan = require 'dev.newfan'
-local Fan = require 'lib.fan'
+-- local Fan = require 'lib.fan'
 local Aircond = require 'dev.aircond'
-local Air = require 'lib.air'
+-- local Air = require 'lib.air'
 local operation = require 'hal.operation'
-local hex = require 'lib.util'.hex
+-- local hex = require 'lib.util'.hex
 local helprd  = require "lib.helpredis"
+local ruihe = require 'dev.ruihe'
+local humi = require 'init.humi'
+local wind = require 'init.wind'
+local temp = require 'init.temp'
 
 local HOST = '192.168.254.7'
 -- local HOST = '192.168.0.7'
 
 local log = ngx.log
 local ERR = ngx.ERR
-local DBG = ngx.DEBUG
+-- local DBG = ngx.DEBUG
 -- local ins = require 'lib.inspect'
 
 _M.init = function()
@@ -31,9 +36,12 @@ _M.init = function()
     air1:registe_service(operation)
 end
 
-local wifi = 0
-local dwk = 0
+
+
 _M.run = function()
+    -- get all provision data from redis
+    ruihe.serialization()
+
     monitor.read_input()
     ngx.sleep(1)
     monitor.read_hold()
@@ -42,70 +50,24 @@ _M.run = function()
     local ate = monitor.get('ate')
     local fan1 = monitor.get('newfan1')
     local air1 = monitor.get('aircond1')
+    local mode = ruihe.get('mode')
 
     local redis = helprd.get()
-    --
-    -- local ate_health = ate:health()
-    -- local fan1_health = fan1:health()
-    -- local cond1_health = air1:health()
+
     if ate then
         local home_temp = ate:get_temp()
         local home_humi = ate:get_humi()
         local home_pm25 = ate:get_pm25()
         local home_19 = ate:get(19)
-        log(DBG, 'temp is:', home_temp)
-        log(DBG, 'humi is:', home_humi)
-        log(DBG, 'pm25 is:', home_pm25)
-        log(DBG, '19 is:', home_19)
-
-        ate:set(redis, 18, wifi)
-        if wifi == 0 then
-            wifi = 1
-        else
-            wifi = 0
-        end
+        l.log(string.format(
+              'temp = %d, humi = %d, pm25 = %d, 19 = %d',
+              home_temp, home_humi, home_pm25, home_19)
+        )
     end
 
-    if fan1 then
-        log(DBG, 'HEALTH:', hex(fan1:get(Fan.INPUT_ADDR_HEALTH)))
-        log(DBG, 'VER:', hex(fan1:get(Fan.INPUT_ADDR_VER)))
-        log(DBG, 'DHT1:', fan1:get(Fan.INPUT_ADDR_DHT1))
-        log(DBG, 'RAT1:', fan1:get(Fan.INPUT_ADDR_RAT1))
-        log(DBG, 'RAH1:', fan1:get(Fan.INPUT_ADDR_RAH1))
-        log(DBG, 'FAT1:', fan1:get(Fan.INPUT_ADDR_FAT1))
-        log(DBG, 'FAE:', fan1:get(Fan.INPUT_ADDR_FAE))
-        log(DBG, 'XLW1:', fan1:get(Fan.INPUT_ADDR_XLW1))
-        log(DBG, 'XLW2:', fan1:get(Fan.INPUT_ADDR_XLW2))
-
-        log(DBG, 'SYNC:', hex(fan1:get_hold(Fan.HOLD_ADDR_SYNC)))
-        log(DBG, 'JSK:', fan1:get_hold(Fan.HOLD_ADDR_JSK))
-        log(DBG, 'DWK:', fan1:get_hold(Fan.HOLD_ADDR_DWK))
-        log(DBG, 'H9:', fan1:get_hold(Fan.HOLD_ADDR_H9))
-
-        -- fan1:set(redis, Fan.HOLD_ADDR_JSK, dwk)
-        -- fan1:set(redis, Fan.HOLD_ADDR_DWK, dwk)
-        -- fan1:set(redis, Fan.HOLD_ADDR_DHV, dwk)
-        -- fan1:set(redis, Fan.HOLD_ADDR_FAV, dwk)
-        -- fan1:set(redis, Fan.HOLD_ADDR_EAO, dwk)
-        -- fan1:set(redis, Fan.HOLD_ADDR_EAK, dwk)
-        -- fan1:set(redis, Fan.HOLD_ADDR_FAO, dwk)
-        -- fan1:set(redis, Fan.HOLD_ADDR_FAK, dwk)
-        -- fan1:set(redis, Fan.HOLD_ADDR_SYNC, 0x0e)
-        -- fan1:set(redis, Fan.HOLD_ADDR_FAX, dwk)
-        if dwk == 0 then
-            dwk = 1
-        else
-            dwk = 0
-        end
-    end
-
-    if air1 then
-        air1:set(redis, Air.HOLD_ADDR_SPO1, dwk)
-        air1:set(redis, Air.HOLD_ADDR_SPO2, dwk)
-        air1:set(redis, Air.HOLD_ADDR_SPK1, dwk)
-        log(DBG, 'test:', air1:get_hold(Air.HOLD_ADDR_TEST))
-        log(DBG, 'spo1:', air1:get_hold(Air.HOLD_ADDR_SPO1))
-    end
+    humi.add(mode, redis, ruihe, fan1, air1)
+    temp.heat(mode, redis, ruihe, fan1, air1)
+    wind.letin(mode, redis, ruihe, fan1)
 
     operation.write()
 

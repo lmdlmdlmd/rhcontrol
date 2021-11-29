@@ -22,50 +22,51 @@
 local _M = {
     -- input registers
     INPUT_ADDR_VER = 0,
-    INPUT_ADDR_XLW1 = 1,
-    INPUT_ADDR_XLW2 = 2,
-    INPUT_ADDR_FPR = 3,
-    INPUT_ADDR_FAR = 4,
-    INPUT_ADDR_FAE = 5,
-    INPUT_ADDR_EAR = 6,
-    INPUT_ADDR_EAE = 7,
-    INPUT_ADDR_RAT1 = 8,
-    INPUT_ADDR_RAH1 = 9,
-    INPUT_ADDR_FAT1 = 10,
-    INPUT_ADDR_FAH1 = 11,
-    INPUT_ADDR_SAT1 = 12,
-    INPUT_ADDR_SAH1 = 13,
-    INPUT_ADDR_DHT1 = 14,
+    INPUT_ADDR_XLW1 = 1, -- 初效压差开关
+    INPUT_ADDR_XLW2 = 2, -- 高效压差开关
+    INPUT_ADDR_FPR = 3, -- 室内风盘联动点
+    INPUT_ADDR_FAR = 4, -- 送风风机  运行状态
+    INPUT_ADDR_FAE = 5,  -- 送风风机  故障状态
+    INPUT_ADDR_EAR = 6,  -- 排风风机  运行状态
+    INPUT_ADDR_EAE = 7,  -- 排风风机  故障状态
+    INPUT_ADDR_RAT1 = 8, -- 室内回风温度
+    INPUT_ADDR_RAH1 = 9, -- 室内回风湿度
+    INPUT_ADDR_FAT1 = 10,  -- 新风温度（室外）
+    INPUT_ADDR_FAH1 = 11,  -- 新风湿度
+    INPUT_ADDR_SAT1 = 12,  -- 送风温度
+    INPUT_ADDR_SAH1 = 13,  -- 送风湿度
+    INPUT_ADDR_DHT1 = 14,  -- 新风机盘管温度/表冷器温度
     INPUT_ADDR_HEALTH  = 15,
     INPUT_ADDR_HEARTBEAT = 16,
 
     -- hold registers
     HOLD_ADDR_TEST = 0,
-    HOLD_ADDR_DWK = 1,
-    HOLD_ADDR_JSK = 2,
-    HOLD_ADDR_DHV = 3,
-    HOLD_ADDR_FAV = 4,
-    HOLD_ADDR_FAK = 5,
-    HOLD_ADDR_FAO = 6,
-    HOLD_ADDR_EAK = 7,
-    HOLD_ADDR_EAO = 8,
+    HOLD_ADDR_DWK = 1, --新风主机
+    HOLD_ADDR_JSK = 2, --加湿水阀
+    HOLD_ADDR_DHV = 3, --冷水阀
+    HOLD_ADDR_FAV = 4, --新风风阀
+    HOLD_ADDR_FAK = 5, -- 送风风机  启停
+    HOLD_ADDR_FAO = 6, -- 送风风机  手动/自动
+    HOLD_ADDR_EAK = 7, -- 排风风机  启停
+    HOLD_ADDR_EAO = 8, -- 排风风机  手动/自动
 
-    HOLD_ADDR_FAX = 9,
-    HOLD_ADDR_EAX = 10,
+    HOLD_ADDR_FAX = 9, -- 送风风机  频率调节
+    HOLD_ADDR_EAX = 10, -- 排风风机  频率调节
 
-    HOLD_ADDR_MODE = 11,
-    HOLD_ADDR_RAHS1 = 12,
-    HOLD_ADDR_RAHS2 = 13,
-    HOLD_ADDR_DHST1 = 14,
-    HOLD_ADDR_H9 = 15,
-    HOLD_ADDR_H8 = 16,
-    HOLD_ADDR_LD1 = 17,
-    HOLD_ADDR_LDS1 = 18,
-    HOLD_ADDR_LD2 = 19,
-    HOLD_ADDR_LDS2 = 20,
-    HOLD_ADDR_WTS1 = 21,
-    HOLD_ADDR_WTS2 = 22,
-    HOLD_ADDR_WTS3 = 23,
+    -- not used
+    -- HOLD_ADDR_MODE = 11,
+    -- HOLD_ADDR_RAHS1 = 12,
+    -- HOLD_ADDR_RAHS2 = 13,
+    -- HOLD_ADDR_DHST1 = 14,
+    -- HOLD_ADDR_H9 = 15,
+    -- HOLD_ADDR_H8 = 16,
+    -- HOLD_ADDR_LD1 = 17,
+    -- HOLD_ADDR_LDS1 = 18,
+    -- HOLD_ADDR_LD2 = 19,
+    -- HOLD_ADDR_LDS2 = 20,
+    -- HOLD_ADDR_WTS1 = 21,
+    -- HOLD_ADDR_WTS2 = 22,
+    -- HOLD_ADDR_WTS3 = 23,
     HOLD_ADDR_SYNC = 24,
 }
 

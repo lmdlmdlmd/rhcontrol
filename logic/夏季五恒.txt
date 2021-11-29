@@ -1,0 +1,61 @@
+
+If  （夏季五恒） then
+  Do
+    新风除湿模式 （参考新风除湿）
+    强制冷模式
+
+
+
+
+//开启二次泵
+
+If  （LD1（露点值）<STS1（夏季毛细管设定温度）） then
+  Do
+    发出开启二次泵信号  SPK1=1（二次泵1开启）  SPK2=1（二次泵2开启）
+    等待SP1（二次泵1）启动时间（暂定1分钟）
+    等待SP2（二次泵2）启动时间（暂定1分钟）
+    If  SPR1（运行状态）=0  then
+      Do
+        SP1已正常启动
+    Else
+      If  SPE1（故障状态）=0  then
+        Do
+          输出SP1故障
+      Else  等待一分钟启动  then
+        If  SPR1=0  then
+          Do
+            SP1已正常启动
+        Else  输出SP1故障
+    If  SPR2（运行状态）=0  then
+      Do
+        SP2已正常启动
+    Else
+      If  SPE2（故障状态）=0  then
+         Do
+           输出SP2故障或不存在
+      Else  等待一分钟启动  then
+        If  SPR2=0  then
+          Do
+            SP2已正常启动
+        Else  输出SP2故障或不存在
+Else  输出系统凝露风险不能开启二次泵SPK1=0  SPK2=0
+
+
+
+
+//强制冷模式
+
+If  开启强制冷 then
+   Do  开启二次泵（参照前面）
+  If  ST1（二次水温）>STS1（夏季毛细管设定温度）  then
+    Do
+      MC1K=1（开主机1）
+      CMV1=1（开毛细冷水阀）
+      If  ST1 > STS1+1℃  then
+        Do
+          MC2K=1（开主机2）
+      Else
+          MC2K=0（关主机2）
+  Else
+    MC1K=0（关主机1）
+    CMV1=0（关毛细冷水阀）

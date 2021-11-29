@@ -1,0 +1,97 @@
+
+If （微热模式） then
+  Do
+    新风（参考除湿打开新风机）
+    弱制热
+    加湿
+
+
+
+//打开制热主机
+
+If 打开制热主机  then
+  Do
+    If  HW_ID=0  then
+       Do
+        向集控器发送请求开共用主机的信号
+        If 主机的HW_ID=00或11  then
+          Do
+            主机不共用或主板硬件ID错误
+        Else
+          If  HW_ID=01  then
+            Do
+              MC1K=1（开空调主机1）
+          Else
+            If  HW_ID=10  then
+              Do
+                MC2K=1（开空调主机2）
+            Else 主机不共用或主板硬件ID错误
+    Else  MC1K=1  （开空调主机1）
+
+
+
+
+//关闭空调主机
+
+If 关闭制热主机 then
+  Do
+    If 新风HW_ID=0 then
+      Do
+        向集控器发送请求关共用主机的信号
+        If 主机的HW_ID=00或11  then
+          Do
+            主机不共用或主板硬件ID错误
+        Else
+          If  HW_ID=01  then
+            Do
+              If  MC1K=1（开空调主机1） then
+                Do
+                  MC1K=1（开空调主机1）
+              Else  MC1K=0（关空调主机1）
+          Else
+            If  HW_ID=10  then
+              Do
+                If  MC2K=1（开空调主机2）then
+                  Do
+                    MC2K=1（开空调主机2）
+                Else  MC2K=0（关空调主机2）
+    Else  MC1K=1 （关闭制热主机）
+
+
+
+
+//弱制热
+
+If  弱制热  then
+  Do
+    For （FAT1（新风温度） <= WTS2（客户冬季舒适温度）-2℃）
+      {
+       MC1K=1（打开制热主机）
+       For（FAT1（新风温度） <= WTS2（客户冬季舒适温度））
+         {
+          MC2K=1（关闭制热主机）
+          }
+       }
+
+
+
+
+//加湿
+
+If  启动加湿  then
+  Do
+    If FAT1（新风温度）< WTS3（冬季低温设定温度） then
+      Do  FAV=0（关闭风阀）
+    Else  FAV=1（保持风阀开启）
+    If  LD2（送风露点） < LDS2（送风露点保护设定值） then
+      Do
+        For（RAH1（室内回风湿度） < RAHS2（冬季加湿设定湿度）-5％）
+          {
+           JSK=1 （打开加湿水阀）
+           For （RAH1 >= RAHS2 ）
+             {
+              JSK=0（关闭加湿水阀）
+              }
+           }
+
+    Else 管道凝露保护，输出报警提示

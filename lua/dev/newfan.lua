@@ -218,6 +218,22 @@ Newfan.unserialization = function(self)
     return  false
 end
 
+-- 回风露点值,RAT1和RAH1计算出来LD1
+Newfan.get_ld1 = function(self)
+    local rat1 = Newfan.get(self, Fan.INPUT_ADDR_RAT1)
+    local rah1 = Newfan.get(self, Fan.INPUT_ADDR_RAH1)
+
+    return rat1 + rah1
+end
+
+-- 送风露点,送风温度和湿度计算出来的数值
+Newfan.get_ld2 = function(self)
+    local sat1 = Newfan.get(self, Fan.INPUT_ADDR_SAT1)
+    local sah1 = Newfan.get(self, Fan.INPUT_ADDR_SAH1)
+
+    return sat1 + sah1
+end
+
 Newfan.__tostring = function(self)
     local str = {}
     str[#str + 1] = format('newfan:%d, health=%d', self.addr, self.health)

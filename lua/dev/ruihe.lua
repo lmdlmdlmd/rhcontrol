@@ -10,13 +10,17 @@ local _M = {
         DHST1 = 0, -- 盘管保护设定温度
         H9 = 0, -- 高风险湿度偏差值
         H8 = 0, -- 低风险湿度偏差值
-        LD1 = 0, -- 回风露点值（RAT1和RAH1计算出来LD1）
+        FAX = 1, -- 送风档位
+        EAX = 1, -- 排风档位
+        -- LD1 = 0, -- 回风露点值,RAT1和RAH1计算出来LD1, caculated value, not software setting
         LDS1 = 0, -- 回风设定露点值（调试模式下设置）
-        LD2 = 0, -- 送风露点（送风温度和湿度计算出来的数值）
+        -- LD2 = 0, -- 送风露点,送风温度和湿度计算出来的数值,caculated value, not software setting
         LDS2 = 0, -- 送风露点保护设定值
         WTS1 = 0, -- 夏季舒适温度
         WTS2 = 0, -- 冬季舒适温度
-        WTS3 = 0, --冬季低温设定温度
+        WTS3 = 0, -- 冬季低温设定温度,
+        STS1 = 0, -- 夏季毛细管设定温度
+        STS2 = 0, -- 冬季毛细管供水设定温度
     }
 }
 -- local format = string.format
@@ -38,6 +42,12 @@ _M.get = function(tp)
     if not tp then return nil end
     local data = _M.data
     return data[tp]
+end
+
+_M.set_alarm = function( i ) -- luacheck: ignore
+end
+
+_M.clear_alarm = function( i) -- luacheck: ignore
 end
 
 _M.serialization = function()

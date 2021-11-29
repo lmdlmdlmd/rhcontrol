@@ -7,53 +7,57 @@
 -- 0x00,0x00, HPE
 -- 0x00,0x00, HWID1
 -- 0x00,0x00, HIWID
--- 0xFB,0x1E,
--- 0xF6,0x3C,
--- 0xFB,0x1E,
--- 0xF6,0x3C,
--- 0xFB,0x1E,
--- 0xF6,0x3C,
--- 0xA1,0x76,
--- 0x82,0x43,
--- 0x5A,0x5A,
+-- 0xA1,0x76, ST1
+-- 0x82,0x43, HT1
+-- 0x5A,0x5A, HEALTH
 -- 0x00,0x00,0x00,0x00,0x00,0x00,0xEA,0x04
 
 local _M = {
   INPUT_ADDR_VER = 0,
-  INPUT_ADDR_SPR1 = 1,
-  INPUT_ADDR_SPE1 = 2,
-  INPUT_ADDR_SPR2 = 3,
-  INPUT_ADDR_SPE2 = 4,
-  INPUT_ADDR_HPE  = 5,
+  INPUT_ADDR_SPR1 = 1, --二次水泵1  运行状态 默认为, 未启动:1; 已启动，读出:0
+  INPUT_ADDR_SPE1 = 2, --二次水泵1  故障状态 默认为，正常:1; 0 代表故障
+  INPUT_ADDR_SPR2 = 3, --二次水泵2  运行状态
+  INPUT_ADDR_SPE2 = 4, --二次水泵1  故障状态
+  INPUT_ADDR_HPE  = 5, --热水循环  水泵故障状态
+  -- HW_ID2=0，HWID1=0，“不共用主机”
+  -- HW_ID2=0，HWID1=1，“共用MC1”
+  -- HW_ID2=1，HWID1=0，“共用MC2”
+  -- HW_ID2=1，HWID1=1，“错误码”
   INPUT_ADDR_HW_ID1 = 6,
   INPUT_ADDR_HW_ID2 = 7,
-  INPUT_ADDR_RAT1 = 8,
-  INPUT_ADDR_RAH1 = 9,
-  INPUT_ADDR_FAT1 = 10,
-  INUT_ADDR_FAH1 = 11,
-  INPUT_ADDR_SAT1 = 12,
-  INPUT_ADDR_SAH1 = 13,
-  INPUT_ADDR_ST1 = 14,
-  INPUT_ADDR_HT1 = 15,
-  INPUT_ADDR_HEALTH = 16,
-  INPUT_ADDR_HEARTBEAT = 17,
+  INPUT_ADDR_ST1 = 8, -- 二次水温
+  INPUT_ADDR_HT1 = 9, -- 热水循环  温度
+  INPUT_ADDR_HEALTH = 10,
+  INPUT_ADDR_HEARTBEAT = 11,
 
   HOLD_ADDR_TEST = 0,
-  HOLD_ADDR_SPO1 = 1,
-  HOLD_ADDR_SPK1 = 2,
-  HOLD_ADDR_SPO2 = 3,
-  HOLD_ADDR_SPE2 = 4,
-  HOLD_ADDR_MC1K = 5,
-  HOLD_ADDR_MC2K = 6,
-  HOLD_ADDR_CMV  = 7,
-  HOLD_ADDR_HMV  = 8,
-  HOLD_ADDR_HPK  = 9,
-  HOLD_ADDR_HPO  = 10,
-  HOLD_ADDR_HBK  = 11,
-  HOLD_ADDR_PF1  = 12,
-  HOLD_ADDR_PF1K = 13,
+  HOLD_ADDR_SPO1 = 1, -- 二次水泵1  手动/自动
+  HOLD_ADDR_SPK1 = 2, -- 二次水泵1  启停控制
+  HOLD_ADDR_SPO2 = 3, -- 二次水泵2  手动/自动
+  HOLD_ADDR_SPK2 = 4, -- 二次水泵2  启停控制
+  HOLD_ADDR_MC1K = 5, -- 空调水机组主机 1
+  HOLD_ADDR_MC2K = 6, -- 空调水机组主机 2
+  HOLD_ADDR_CMV  = 7, -- 毛细管制冷水阀
+  HOLD_ADDR_HMV  = 8, -- 辅助制热
+  HOLD_ADDR_HPK  = 9, -- 热水循环  启停控制
+  HOLD_ADDR_HPO  = 10, -- 热水循环  手动/自动
+  HOLD_ADDR_HBK  = 11, -- 锅炉启停
+  -- 两个继电器构成组合开关。
+  -- PF1=0，PF1K=0，代表“关机”
+  -- PF1=0，PF1K=1，代表“低档”
+  -- PF1=1，PF1K=0，代表“高档”
+  HOLD_ADDR_PF1  = 12, -- 排风扇1 高低档位控制
+  HOLD_ADDR_PF1K = 13, -- 排风扇1 风机开关
+  -- 两个继电器构成组合开关。
+  -- PF2=0，PF2K=0，代表“关机”
+  -- PF2=0，PF2K=1，代表“低档”
+  -- PF2=1，PF2K=0，代表“高档”
   HOLD_ADDR_PF2  = 14,
   HOLD_ADDR_PF2K = 15,
+  --   两个继电器构成组合开关。
+  -- PF3=0，PF3K=0，代表“关机”。
+  -- PF3=0，PF3K=1，代表“低档”。
+  -- PF3=1，PF3K=0，代表“高档”
   HOLD_ADDR_PF3  = 16,
   HOLD_ADDR_PF3K = 17,
   HOLD_ADDR_MODE = 18,

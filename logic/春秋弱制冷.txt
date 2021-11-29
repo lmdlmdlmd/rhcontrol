@@ -1,0 +1,78 @@
+
+If  （微冷模式） then
+  Do
+     除湿新风（参考前面）
+     弱制冷
+
+
+//打开制冷主机
+
+If  打开制冷主机  then
+  Do
+    If 新风HW_ID=0 then
+      Do
+        向集控器发送请求开共用主机的信号
+        If 主机的HW_ID=00或11  then
+          Do
+            主机不共用或主板硬件ID错误
+        Else
+          If  HW_ID=01  then
+            Do
+              MC1K=1（开空调主机1）
+          Else
+            If  HW_ID=10  then
+              Do
+                MC2K=1（开空调主机2）
+            Else 主机不共用或主板硬件ID错误
+    Else   MC1K=1（开空调主机1）
+
+
+
+
+//关闭制冷主机
+
+If 关闭制冷主机 then
+  Do
+    If 新风HW_ID=0 then
+      Do
+        向集控器发送请求关共用主机的信号
+        If 主机的HW_ID=00或11  then
+          Do
+            主机不共用或主板硬件ID错误
+        Else
+          If  HW_ID=01  then
+            Do
+              If  MC1K=1（开空调主机1） then
+                Do
+                  MC1K=1（开空调主机1）
+              Else  MC1K=0（关空调主机1）
+          Else
+            If  HW_ID=10  then
+              Do
+                If  MC2K=1（开空调主机2）then
+                  Do
+                    MC2K=1（开空调主机2）
+                Else  MC2K=0（关空调主机2）
+    Else   MC1K=0（关空调主机1）
+
+
+
+//弱制冷
+
+If  （弱制冷） then
+  Do
+    For  （RAT1（室内回风温度）>=WTS1（夏季舒适温度）+2 ）
+     {
+      除湿主机（冷源主机）启动
+      For  （RAT01（室内回风温度） < STS01+2℃（毛细管供水设定温度））
+       {
+        除湿主机（冷源主机）关闭
+        }
+      For  （ RAT1 < WTS1 ）
+       {
+        除湿主机（冷源主机）关闭
+        If  RAT1<=STS1  then
+          Do
+            SPK1=0，SPK2=0，关闭二次水泵
+        }
+      }
