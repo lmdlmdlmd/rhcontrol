@@ -4,6 +4,7 @@ local Fan = require 'lib.fan'
 local Air = require 'lib.air'
 
 -- 加湿
+-- 把水加入到空气， 水打开，加热加水（空调加热）
 _M.add = function(mode, redis, p_ruihe, p_fan, p_air)
   l.log('enter into add:', mode)
   local rah1 = p_fan:get(Fan.INPUT_ADDR_RAH1) --室内回风湿度
@@ -18,21 +19,27 @@ _M.add = function(mode, redis, p_ruihe, p_fan, p_air)
   -- end
 
   local JSK -- 加湿水阀
-  local MC1K --空调水机组主机1
+  local MC1K -- 空调水机组主机1
+  local MC2K -- 空调水机组主机2
   if ld2 < lds2 and rah1 < rahs2 then
       JSK = 1
-      MC1K = 1
+      if 有mc2 then
+          MC2K = 1
+      else
+          MC1K = 1
+      end
   end
 
   -- 秋季加湿, param is different
   -- if ld2 < lds2 and rah1 < rahs2 * 0.95 then
   --     JSK = 1
-  --     MC1K = 1
+  --     -- MC1K = 1，不一定打开；如果偏差很大，可能需要打开 ***
   -- end
 
-  if ld2 >= lds2 or rah1 > rahs2 * 1.03 then
+  -- 湿度是百分数 1-100%
+  if ld2 >= lds2 or rah1 > (rahs2 + 0.03) then
       JSK = 0
-      -- MC1K?????????????
+      -- MC1K 另外的东西来决定是否关闭，这个地方不能完全决定关闭
       -- 秋季加湿不用打开空调
   end
 
@@ -41,6 +48,9 @@ _M.add = function(mode, redis, p_ruihe, p_fan, p_air)
   end
   if MC1K then
       p_air:set(redis, Air.HOLD_ADDR_MC1K, MC1K)
+  end
+  if MC2K then
+      p_air:set(redis, Air.HOLD_ADDR_MC2K, MC2K)
   end
 end
 
@@ -54,32 +64,43 @@ _M.minus = function(mode, redis, p_ruihe, p_fan, p_air)
     local dht1 = p_fan:get(Fan.INPUT_ADDR_DHT1)  --盘管温度
     local dhst1 = p_ruihe.get('DHST1') -- 盘管保护设定温度
 
-    local DWK --新风主机, 也是除湿主机
+    local DWK  --新风直膨主机, 可能没有
     local MC1K --空调水机组主机1
-    local MC2K --空调水机组主机2
-    local DHV  --冷水阀	新风表冷水阀
+    local MC2K --空调水机组主机2，可能也没有
+    local DHV  --冷水阀	新风表冷水阀， **可能没有**
     local FAV  --新风风阀
     local diff = rah1 - rahs1
     -- 回风湿度高于设定湿度RAHS1
     if diff > 0 then
-        -- MC1切换到制冷模式 这个操作还没实现，通过空调的master设置命令
-        -- MC2切换到制冷模式 这个操作还未实现，通过空调的master设置命令
-        -- 开启新风主机	新风外机	DWK=1或MC1K=1或 MC2K=1
-        MC1K = 1
-        MC2K = 1
-        DWK = 1 -- ?????这个东西新风启动的时候要不要启动？
-        -- 开启冷水阀
-        DHV = 1
+        -- 顺序开，DWK -> MC2K -> MC1K
+        -- 判断硬件决定开 dwk+mc1, mc1, mc1+mc2
+        -- 谁提供冷源
+        if 有dwk then
+            DWK = 1
+            if diff > h9 then
+                -- 开启冷水阀
+                DHV = 1 -- MC1搞出来的
+            end
+        else
+            if 有mc2 then
+                MC2K = 1
+                MC2切换到制冷模式 这个操作还未实现，通过空调的master设置命令
+            else
+                MC1K = 1
+                MC1切换到制冷模式 这个操作还没实现，通过空调的master设置命令
+            end
+        end
     else
         -- 回风湿度继续降低到正常水平
         -- 关闭除湿主机
         -- 其实是关闭新风外机
-        DWK = 0
-        MC1K = 0
-        MC2K = 0
+        MC2K = 0 -- 先关
+        MC1K = 0 -- 然后关
+        DWK = 0 -- 然后关
     end
+
     if diff > h9 then
-        -- 关闭新风风阀
+        -- 关闭新风风阀，湿度过大
         FAV = 0
     elseif diff < h8 and diff > 0 then
         -- 打开新风风阀
@@ -87,8 +108,10 @@ _M.minus = function(mode, redis, p_ruihe, p_fan, p_air)
     end
 
     if dht1 < dhst1 then
-        DWK = 0
-        DHV = 0
+        if 有dwk then
+            DWK = 0
+            DHV = 0
+        end
     end
 
     if DWK then

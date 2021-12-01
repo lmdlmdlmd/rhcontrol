@@ -31,24 +31,24 @@ local _M = {
     INPUT_ADDR_EAE = 7,  -- 排风风机  故障状态
     INPUT_ADDR_RAT1 = 8, -- 室内回风温度
     INPUT_ADDR_RAH1 = 9, -- 室内回风湿度
-    INPUT_ADDR_FAT1 = 10,  -- 新风温度（室外）
+    INPUT_ADDR_FAT1 = 10,  -- 新风温度（室外），**可能没有**
     INPUT_ADDR_FAH1 = 11,  -- 新风湿度
-    INPUT_ADDR_SAT1 = 12,  -- 送风温度
-    INPUT_ADDR_SAH1 = 13,  -- 送风湿度
+    INPUT_ADDR_SAT1 = 12,  -- 送风温度，**可能没有**
+    INPUT_ADDR_SAH1 = 13,  -- 送风湿度，**可能没有**
     INPUT_ADDR_DHT1 = 14,  -- 新风机盘管温度/表冷器温度
     INPUT_ADDR_HEALTH  = 15,
     INPUT_ADDR_HEARTBEAT = 16,
 
     -- hold registers
     HOLD_ADDR_TEST = 0,
-    HOLD_ADDR_DWK = 1, --新风主机
+    HOLD_ADDR_DWK = 1, --新风直膨主机, **可能没有**
     HOLD_ADDR_JSK = 2, --加湿水阀
     HOLD_ADDR_DHV = 3, --冷水阀
     HOLD_ADDR_FAV = 4, --新风风阀
     HOLD_ADDR_FAK = 5, -- 送风风机  启停
-    HOLD_ADDR_FAO = 6, -- 送风风机  手动/自动
+    HOLD_ADDR_FAO = 6, -- 送风风机  手动/自动， 意义不明确
     HOLD_ADDR_EAK = 7, -- 排风风机  启停
-    HOLD_ADDR_EAO = 8, -- 排风风机  手动/自动
+    HOLD_ADDR_EAO = 8, -- 排风风机  手动/自动，意义不明确
 
     HOLD_ADDR_FAX = 9, -- 送风风机  频率调节
     HOLD_ADDR_EAX = 10, -- 排风风机  频率调节

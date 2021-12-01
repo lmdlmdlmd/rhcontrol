@@ -31,7 +31,7 @@ local _M = {
   INPUT_ADDR_HEARTBEAT = 11,
 
   HOLD_ADDR_TEST = 0,
-  HOLD_ADDR_SPO1 = 1, -- 二次水泵1  手动/自动
+  HOLD_ADDR_SPO1 = 1, -- 二次水泵1  手动/自动, debug用
   HOLD_ADDR_SPK1 = 2, -- 二次水泵1  启停控制
   HOLD_ADDR_SPO2 = 3, -- 二次水泵2  手动/自动
   HOLD_ADDR_SPK2 = 4, -- 二次水泵2  启停控制

@@ -23,42 +23,52 @@ _M.heat = function(mode, redis, p_ruihe, p_fan, p_air)
     -- end
 
     local MC1K -- 空调水机组主机1
-    local MC2K --空调水机组主机2
+    local MC3K --空调水机组主机3, 可能不存在， 和mc2不一样
     local HMV  -- 辅助加热
+    local SPK1 -- 二次水泵1
+    local SPK2 -- 二次水泵2
     if st1 <= sts2 - THREE_DEGREE then
-        MC2K = 1
+        MC3K = 1
         HMV = 1
-        -- 开启二次水泵
-    elseif st1 >= sts2 then
-        MC2K = 0
-        HMV = 0
-        -- 关闭二次水泵
     elseif st1 >= sts2 - ONE_DEGREE then
-        MC2K = 0
+        MC3K = 0
+    elseif st1 >= sts2 then
+        MC3K = 0
+        HMV = 0
     else -- luacheck: ignore
         --- ???????
     end
 
     if st1 <= sts2 then
         MC1K = 1
+        -- 开启二次水泵
+        SPK1 = 1
+        SPK2 = 1
     else
         MC1K = 0
     end
 
-    if rat1 >= wts2 then -- luacheck: ignore
+    if rat1 > wts2 then
         -- 关闭热源主机
-    else
         MC1K = 0
+        MC3K = 0
+        HMV = 0
     end
 
     if MC1K then
         p_air:set(redis, Air.HOLD_ADDR_MC1K, MC1K)
     end
-    if MC2K then
-        p_air:set(redis, Air.HOLD_ADDR_MC2K, MC2K)
+    if MC3K then
+        p_air:set(redis, Air.HOLD_ADDR_MC3K, MC3K)
     end
     if HMV then
         p_air:set(redis, Air.HOLD_ADDR_HMV, HMV)
+    end
+    if SPK1 then
+        p_air:set(redis, Air.HOLD_ADDR_SPK1, SPK1)
+    end
+    if SPK2 then
+        p_air:set(redis, Air.HOLD_ADDR_SPK2, SPK2)
     end
 end
 
@@ -68,27 +78,28 @@ _M.cool = function(mode, redis, p_ruihe, _, p_air)
     local st1 = p_air:get(Air.INPUT_ADDR_ST1) -- 二次水温
 
     local MC1K
-    local MC2K
+    local MC3K
     local CMV -- 毛细管制冷水阀
     if st1 > sts1 + ONE_DEGREE then
-        MC1K = 1
-        MC2K = 2
         CMV = 1
-    elseif st1 > sts1 then
         MC1K = 1
+        MC3K = 1
+    elseif st1 >= sts1 then
         CMV = 1
-        MC2K = 0
+        MC1K = 1
+        MC3K = 0
+    elseif st1 < sts1 - ONE_DEGREE then
+        CMV = 0
     else
         MC1K = 0
-        MC2K = 0
-        CMV = 0
+        MC3K = 0
     end
 
     if MC1K then
         p_air:set(redis, Air.HOLD_ADDR_MC1K, MC1K)
     end
-    if MC2K then
-        p_air:set(redis, Air.HOLD_ADDR_MC2K, MC2K)
+    if MC3K then
+        p_air:set(redis, Air.HOLD_ADDR_MC3K, MC3K)
     end
     if CMV then
         p_air:set(redis, Air.HOLD_ADDR_HMV, CMV)

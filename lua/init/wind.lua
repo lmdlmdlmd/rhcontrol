@@ -5,6 +5,8 @@ local ds  = require 'lib.ds'
 
 -- ??????? when to stop xin wind
 -- 什么情况下停止新风? 现在依据的时候配置层面做的事情
+-- 夏季湿度高也需要关掉？？？？？
+-- FAK=1 always 打开
 _M.letin = function(mode, redis, p_ruihe, p_fan)
     l.log('enter into heat:', mode)
     local far = p_fan:get(Fan.INPUT_ADDR_FAR)
@@ -25,7 +27,7 @@ _M.letin = function(mode, redis, p_ruihe, p_fan)
 
     -- FAK = 1 if fak > 0 else 0
     p_fan:set(redis, Fan.HOLD_ADDR_FAK, (fax > 0 and 1) or 0)
-    --set fax to fax
+    -- set fax to fax
     p_fan:set(redis, Fan.HOLD_ADDR_FAX, fax)
 
     -- EAK = 1 if eax > 0 else 0
@@ -46,11 +48,12 @@ _M.letin = function(mode, redis, p_ruihe, p_fan)
     p_fan:set(redis, Fan.HOLD_ADDR_FAV, FAV)
 
     --??????
-    -- EA0 & EAK 排风的逻辑是什么？手动，自动？
+    -- EAK & EAO 排风的逻辑是什么？手动，自动？
     -- FAK & FAO 送风的逻辑是什么？手动，自动？
+    -- 手动就按照设定档位固定操作
+    -- FAO & EAO
+    -- 自动依据逻辑自己去做（不考虑）
 end
-
-
 
 -- 过滤网堵塞报警
 -- If  XLW1=1（初效过滤网压差开关开启）  then

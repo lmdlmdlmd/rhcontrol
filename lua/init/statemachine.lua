@@ -65,6 +65,7 @@ _M.run = function()
         )
     end
 
+
     humi.add(mode, redis, ruihe, fan1, air1)
     temp.heat(mode, redis, ruihe, fan1, air1)
     wind.letin(mode, redis, ruihe, fan1)
