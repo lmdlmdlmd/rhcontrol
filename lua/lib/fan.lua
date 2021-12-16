@@ -36,8 +36,9 @@ local _M = {
     INPUT_ADDR_SAT1 = 12,  -- 送风温度，**可能没有**
     INPUT_ADDR_SAH1 = 13,  -- 送风湿度，**可能没有**
     INPUT_ADDR_DHT1 = 14,  -- 新风机盘管温度/表冷器温度
-    INPUT_ADDR_HEALTH  = 15,
-    INPUT_ADDR_HEARTBEAT = 16,
+    INPUT_ADDR_HWID = 15,  -- dwk 是否存在标志
+    INPUT_ADDR_HEALTH  = 16,
+    INPUT_ADDR_HEARTBEAT = 17,
 
     -- hold registers
     HOLD_ADDR_TEST = 0,

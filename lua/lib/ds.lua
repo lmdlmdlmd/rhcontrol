@@ -13,4 +13,7 @@ _M.ALARM_XLW2 = 2
 _M.ALARM_SPE1 = 3
 _M.ALARM_SPE2 = 4
 
+_M.COLD_MODE = 1
+_M.HOT_MODE = 2
+
 return _M

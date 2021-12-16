@@ -2,6 +2,7 @@ local _M = {}
 local l = require 'lib.log'
 local Fan = require 'lib.fan'
 local Air = require 'lib.air'
+local ds = require 'lib.ds'
 
 -- 加湿
 -- 把水加入到空气， 水打开，加热加水（空调加热）
@@ -23,7 +24,7 @@ _M.add = function(mode, redis, p_ruihe, p_fan, p_air)
   local MC2K -- 空调水机组主机2
   if ld2 < lds2 and rah1 < rahs2 then
       JSK = 1
-      if 有mc2 then
+      if p_air:has_mc2() then
           MC2K = 1
       else
           MC1K = 1
@@ -75,19 +76,21 @@ _M.minus = function(mode, redis, p_ruihe, p_fan, p_air)
         -- 顺序开，DWK -> MC2K -> MC1K
         -- 判断硬件决定开 dwk+mc1, mc1, mc1+mc2
         -- 谁提供冷源
-        if 有dwk then
+        if p_fan:has_dwk() then
             DWK = 1
             if diff > h9 then
                 -- 开启冷水阀
                 DHV = 1 -- MC1搞出来的
             end
         else
-            if 有mc2 then
+            if p_air:has_mc2() then
                 MC2K = 1
-                MC2切换到制冷模式 这个操作还未实现，通过空调的master设置命令
+                -- MC2切换到制冷模式 这个操作还未实现，通过空调的master设置命令
+                p_air:set_mc2(ds.COLD_MODE)
             else
                 MC1K = 1
-                MC1切换到制冷模式 这个操作还没实现，通过空调的master设置命令
+                -- MC1切换到制冷模式 这个操作还没实现，通过空调的master设置命令
+                p_air:set_mc1(ds.COLD_MODE)
             end
         end
     else
@@ -108,7 +111,7 @@ _M.minus = function(mode, redis, p_ruihe, p_fan, p_air)
     end
 
     if dht1 < dhst1 then
-        if 有dwk then
+        if p_fan:has_dwk() then
             DWK = 0
             DHV = 0
         end

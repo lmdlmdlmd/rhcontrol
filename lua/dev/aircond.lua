@@ -144,6 +144,19 @@ Aircond.get = function(self, index)
     return get(self, data, index)
 end
 
+Aircond.has_mc2 = function(self)
+    local hwid2 = self:get(Air.INPUT_ADDR_HW_ID1)
+    local hwid1 = self:get(Air.INPUT_ADDR_HW_ID2)
+    if hwid2 == 1 and hwid1 == 0 then
+        return true
+    end
+    return false
+end
+
+Aircond.set_mc2 = function(self, mode)
+    self:set()
+end
+
 Aircond.get_hold = function(self, index)
     local data = self.hold_data
     return get(self, data, index)

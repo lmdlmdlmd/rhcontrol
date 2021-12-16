@@ -146,6 +146,12 @@ Newfan.get = function(self, index)
     return get(self, data, index)
 end
 
+Newfan.has_dwk = function(self)
+    --  “1”代表有直膨式主机，“0”代表无直膨主机，需要共用空调主机
+    local v = self:get(Fan.INPUT_ADDR_HWID)
+    return v > 0
+end
+
 Newfan.get_hold = function(self, index)
     local data = self.hold_data
     return get(self, data, index)
