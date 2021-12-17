@@ -154,7 +154,7 @@ Aircond.has_mc2 = function(self)
 end
 
 Aircond.set_mc2 = function(self, mode)
-    self:set()
+    -- self:set()
 end
 
 Aircond.get_hold = function(self, index)
@@ -180,6 +180,7 @@ Aircond.set = function(self, redis, tp, val)
     log(ERR, key, ':', val)
     redis:lpush(key, val)
 end
+
 -- 通过网operation注册往对应设备下发的命令
 Aircond.registe_service = function(self, operation)
     local pfun = function() return self.get_cmd end

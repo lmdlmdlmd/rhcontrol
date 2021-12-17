@@ -21,6 +21,7 @@ local log = ngx.log
 local ERR = ngx.ERR
 -- local DBG = ngx.DEBUG
 -- local ins = require 'lib.inspect'
+local format = string.format
 
 _M.init = function()
     local ate1 = Ate.new(0xf, HOST, 29)
@@ -59,9 +60,9 @@ _M.run = function()
         local home_humi = ate:get_humi()
         local home_pm25 = ate:get_pm25()
         local home_19 = ate:get(19)
-        l.log(string.format(
+        l.log(format(
               'temp = %d, humi = %d, pm25 = %d, 19 = %d',
-              home_temp, home_humi, home_pm25, home_19)
+              home_temp or 0, home_humi or 0, home_pm25 or 0, home_19 or 0)
         )
     end
 

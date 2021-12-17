@@ -8,7 +8,7 @@ local ds  = require 'lib.ds'
 -- 夏季湿度高也需要关掉？？？？？
 -- FAK=1 always 打开
 _M.letin = function(mode, redis, p_ruihe, p_fan)
-    l.log('enter into heat:', mode)
+    l.log('enter into letin:', mode)
     local far = p_fan:get(Fan.INPUT_ADDR_FAR)
     local fae = p_fan:get(Fan.INPUT_ADDR_FAE)
     local fax = p_ruihe.get('FAX') -- 送风档位
@@ -16,6 +16,11 @@ _M.letin = function(mode, redis, p_ruihe, p_fan)
 
     local fat1 = p_fan:get(Fan.INPUT_ADDR_FAT1) --新风温度（室外)
     local wts3 = p_ruihe.get('WTS3') -- 冬季低温设定温度
+
+    if not far or not fae or not fax or not eax or not fat1 or not wts3 then
+        l.log('SOMETHING WRONG IN wind, invalid values')
+        return
+    end
 
     if far == 0 then
         if fae == 1 then

@@ -229,7 +229,10 @@ Newfan.get_ld1 = function(self)
     local rat1 = Newfan.get(self, Fan.INPUT_ADDR_RAT1)
     local rah1 = Newfan.get(self, Fan.INPUT_ADDR_RAH1)
 
-    return rat1 + rah1
+    if rat1 and rah1 then
+        return rat1 + rah1
+    end
+    return 100
 end
 
 -- 送风露点,送风温度和湿度计算出来的数值
@@ -237,7 +240,11 @@ Newfan.get_ld2 = function(self)
     local sat1 = Newfan.get(self, Fan.INPUT_ADDR_SAT1)
     local sah1 = Newfan.get(self, Fan.INPUT_ADDR_SAH1)
 
-    return sat1 + sah1
+    if sat1 and sah1 then
+        return sat1 + sah1
+    end
+
+    return 100
 end
 
 Newfan.__tostring = function(self)

@@ -24,7 +24,7 @@ local dev_config = {
     max_len = 24,
     read_key_fun = 0x03,
     write_key_fun = 0x06,
-    max_sick_to_offline = 4
+    max_sick_to_offline = 4,
 }
 
 function Ate.new(addr, host, port)

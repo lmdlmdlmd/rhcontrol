@@ -15,6 +15,11 @@ _M.heat = function(mode, redis, p_ruihe, p_fan, p_air)
     local wts2 = p_ruihe.get('WTS2') --  冬季舒适温度
     local sts2 = p_ruihe.get('STS2') -- 冬季毛细管供水设定温度
 
+    if not rat1 or not st1 or not wts2 or not sts2 then
+        l.log('SOMETHING WRONG IN HEAR, NO VALID VALUE')
+        return
+    end
+
     -- if home temp is small then wts2 then heat
     -- if fat1 < wts2 then
         -- 温控器开启制热模式
