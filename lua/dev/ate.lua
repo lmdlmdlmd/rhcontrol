@@ -8,6 +8,7 @@ local Task  = require "lib.task"
 
 local format = string.format
 local lshift = bit.lshift
+local band   = bit.band
 local format_bytes = util.format_bytes
 
 local log = ngx.log
@@ -32,7 +33,10 @@ function Ate.new(addr, host, port)
     self.addr = addr or 0xf -- default addr is 0x0f
     self.host = host
     self.port = port
-    self.data = {}
+    self.data = {0,0,0,0,0,0,0,0,0,0}
+    for _ = 1, 1, 40 do
+        self.data[#self.data + 1 ] = 0
+    end
     self.read_all_cmd = nil
     self.health = ds.DEV_HEALTH_OFFLINE
     self.sick_count = 0
@@ -93,6 +97,25 @@ Ate.set_data = function(self, newdata, start )
         -- log(ERR, i+start, '=', v)
     end
     Ate.serialization(self)
+    return true
+end
+
+Ate.set_data_index = function(self, index, val, serialize)
+    local data = self.data
+    local nindex = 3 + (index * 2)
+    if nindex > #data then
+        ngx.say('index:', index)
+        return nil
+    end
+    self.health = ds.DEV_HEALTH_ONLINE
+    local highbits = band(val, 0xff00)
+    local lowbits  = band(val, 0x00ff)
+    data[nindex - 1] = highbits
+    data[nindex] = lowbits
+
+    if serialize then
+        Ate.serialization(self)
+    end
     return true
 end
 
@@ -183,7 +206,7 @@ Ate.unserialization = function(self)
     -- local d_str = cjson.encode(d)
     local redis = helprd.get()
     local d_str = redis:get(key)
-    -- log(ERR, d_str)
+    log(ERR, d_str)
     if d_str then
         local d = cjson.decode(d_str)
         if d then

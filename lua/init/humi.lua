@@ -57,7 +57,7 @@ end
 
 -- 除湿
 _M.minus = function(mode, redis, p_ruihe, p_fan, p_air)
-    l.log('enter into heat:', mode)
+    l.log('enter into minus:', mode)
     local rah1 = p_fan:get(Fan.INPUT_ADDR_RAH1) -- 室内回风湿度
     local rahs1 = p_ruihe.get('RAHS1') -- 设定除湿湿度
     local h9 = p_ruihe.get('H9') -- 高风险湿度偏差值

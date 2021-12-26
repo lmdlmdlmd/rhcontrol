@@ -38,7 +38,6 @@ _M.init = function()
 end
 
 
-
 _M.run = function()
     -- get all provision data from redis
     ruihe.serialization()

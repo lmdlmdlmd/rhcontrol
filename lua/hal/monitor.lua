@@ -53,18 +53,22 @@ _M.read_input = function()
     local tasks = {}
     for i, v in ipairs(devs) do
         local obj = v.obj
-        local senddata = obj:get_read_cmd()
-        -- log(ERR, util.format_bytes(senddata))
-        if senddata then
-            local host = obj:get_host()
-            local port = obj:get_port()
-            -- log(ERR, host,':', port)
-            -- log(ERR, ins(senddata))
-            local t = spawn(send, host, port, senddata, v.maxsize)
-            tasks[#tasks + 1] = {
-                index = i,
-                t = t
-            }
+        if obj then -- 模拟， 全部去模拟
+            obj:unserialization()
+        else
+            local senddata = obj:get_read_cmd()
+            -- log(ERR, util.format_bytes(senddata))
+            if senddata then
+                local host = obj:get_host()
+                local port = obj:get_port()
+                -- log(ERR, host,':', port)
+                -- log(ERR, ins(senddata))
+                local t = spawn(send, host, port, senddata, v.maxsize)
+                tasks[#tasks + 1] = {
+                    index = i,
+                    t = t
+                }
+            end
         end
     end
 
