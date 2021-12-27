@@ -61,8 +61,8 @@ local data_from_excel = {
 local init_data = function(data)
     for i, v in ipairs(data) do
         local one_row = split(v, ',')
-        ngx.say(one_row)
-        ngx.say(v)
+        -- ngx.say(one_row)
+        -- ngx.say(v)
         local row = {}
         for _, vv in ipairs(one_row) do
             local n = tonumber(vv)
@@ -79,7 +79,7 @@ local init_data = function(data)
     end
 end
 
-local gen_temp_index = function(ptemp)
+local get_temp_index = function(ptemp)
     local temp = ptemp
     if temp < 12 then
         temp = 12
@@ -89,10 +89,10 @@ local gen_temp_index = function(ptemp)
 
     local diff = temp - 12
     local index = math.floor(diff * 2 + 0.5) + 1
-    return index
+    return index, temp
 end
 
-local get_humi_indexs = function(phumi)
+local get_humi_index = function(phumi)
     local humi_list = _M.humi
     if not humi_list then
         init_data(data_from_excel)
@@ -106,15 +106,51 @@ local get_humi_indexs = function(phumi)
         humi = humi_list[#humi_list]
     end
 
-    local start_index = 1
-    local end_index = 1
-    for _, v in ipairs(humi_list) do
-        
+    local end_index = 0
+    for i, v in ipairs(humi_list) do
+        if humi >= v then
+            end_index = i
+            break
+        end
     end
+
+    return end_index, humi
 end
 
+_M.get_ld = function(ptemp, phumi)
+    local temp_index = get_temp_index(ptemp)
+    local humi_index, humi = get_humi_index(phumi)
+    local humi_row = _M.humi
 
+    if not(temp_index >= 1 and humi_index >= 1) then
+        return nil, 'temp_index or humi_index = 0'
+    end
 
+    local data = _M.data[temp_index]
+    if not data then
+        return nil, 'data is nil'
+    end
+
+    if humi_row[humi_index] == humi then
+        return data[humi_index] or 0
+    end
+
+    local begin_index = humi_index - 1
+    local ld_bv = data[begin_index] or 0
+    local ld_sv = data[humi_index] or 0
+    local humi_bv = humi_row[begin_index]
+    local humi_sv = humi_row[humi_index]
+
+    local diff = (humi_bv - humi) / (humi_bv - humi_sv) * (ld_bv - ld_sv)
+    return ld_bv - diff
+end
+
+-- ngx.say(_M.get_ld(12, 98))
+-- ngx.say(_M.get_ld(12, 97))
+-- ngx.say(_M.get_ld(12, 96))
+-- ngx.say(_M.get_ld(12.5, 80))
+-- ngx.say(_M.get_ld(34, 26))
+-- ngx.say(_M.get_ld(34, 24))
 --
 -- local ins = require 'lib.inspect'
 -- for _, v in ipairs(_M.data) do
@@ -124,12 +160,12 @@ end
 -- local str = '0.1,,,,,,,,0,,,,,,,,,,,'
 -- ngx.say(split(str, '(,)'))
 
--- ngx.say(gen_temp_index(12))
--- ngx.say(gen_temp_index(12.1))
--- ngx.say(gen_temp_index(12.5))
--- ngx.say(gen_temp_index(20))
--- ngx.say(gen_temp_index(20.1))
--- ngx.say(gen_temp_index(20.6))
--- ngx.say(gen_temp_index(35))
+-- ngx.say(get_temp_index(12))
+-- ngx.say(get_temp_index(12.1))
+-- ngx.say(get_temp_index(12.5))
+-- ngx.say(get_temp_index(20))
+-- ngx.say(get_temp_index(20.1))
+-- ngx.say(get_temp_index(20.6))
+-- ngx.say(get_temp_index(35))
 
 return _M
