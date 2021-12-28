@@ -5,6 +5,7 @@ local bit   = require "bit"
 local Fan   = require "lib.fan"
 local Task  = require "lib.task"
 local Ld    = require "lib.ld"
+local l     = require "lib.log"
 local cjson  = require "cjson.safe"
 local helprd = require "lib.helpredis"
 local format = string.format
@@ -173,7 +174,7 @@ end
 
 Newfan.set = function(self, redis, index, val)
     local key = Task.get_redis_key(dev_config.name, self.addr, index)
-    -- log(ERR, key, ':', index, ':', val)
+    l.log(Fan.get_hold_name(index), ',', key, '=', val)
     redis:lpush(key, val)
 end
 -- 通过网operation注册往对应设备下发的命令

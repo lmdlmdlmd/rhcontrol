@@ -35,7 +35,7 @@ _M.send = function(host, port, data, maxreadsize)
     local err, ok, readdata
     local bytes -- luacheck: ignore
 
-    log(DBG, 'sending ok:', host, ':', port, '=', format_bytes(data), ',len=', #data)
+    -- log(DBG, 'sending ok:', host, ':', port, '=', format_bytes(data), ',len=', #data)
     return true, nil
 
     -- local lockname = format('hp:%s:%s', host, port)

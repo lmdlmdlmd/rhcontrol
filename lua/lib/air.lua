@@ -61,7 +61,16 @@ local _M = {
   HOLD_ADDR_PF3  = 16,
   HOLD_ADDR_PF3K = 17,
   HOLD_ADDR_MODE = 18,
-  HOLD_ADDR_SYNC = 19
+  HOLD_ADDR_SYNC = 19,
+
+  hold_names = {
+      'SPO1','SPK1','SPO2','SPK2','MC1K','MC2K','CMV','HMV','HPK','HPO',
+      'HBK', 'PF1', 'PF1K','PF2', 'PF2K', 'PF3', 'PF3K', 'MODE', 'SYNC'
+  }
 }
+
+_M.get_hold_name = function(index)
+    return _M['hold_names'][index] or 'nil'
+end
 
 return _M

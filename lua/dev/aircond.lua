@@ -3,6 +3,7 @@ local crc16 = require "lib.crc16"
 local util  = require "lib.util"
 local Air   = require "lib.air"
 local Task  = require "lib.task"
+local l = require "lib.log"
 local bit   = require "bit"
 local cjson  = require "cjson.safe"
 local helprd = require "lib.helpredis"
@@ -13,8 +14,8 @@ local format_bytes = util.format_bytes
 
 local log = ngx.log
 local ERR = ngx.ERR
--- local DBG = ngx.DEBUG
--- local ins = require 'lib.inspect'
+local DBG = ngx.DEBUG
+local ins = require 'lib.inspect'
 
 local Aircond = {}
 Aircond.__index = Aircond
@@ -177,7 +178,7 @@ end
 
 Aircond.set = function(self, redis, tp, val)
     local key = Task.get_redis_key(dev_config.name, self.addr, tp)
-    log(ERR, key, ':', val)
+    log(DBG, Air.get_hold_name(tp), ',', key, '=', val)
     redis:lpush(key, val)
 end
 

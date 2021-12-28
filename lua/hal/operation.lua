@@ -80,7 +80,7 @@ _M.write = function()
             log(ERR, format('host=%s port=%s send fail=%s', obj:host(), obj:port(), res))
         else
             local d = stringtotable(res)
-            log(ERR, 'name=', name, '==', format_bytes(d))
+            -- log(ERR, 'name=', name, '==', format_bytes(d))
         end
     end
 end

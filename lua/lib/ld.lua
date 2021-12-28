@@ -1,3 +1,4 @@
+local l     = require "lib.log"
 local ngx_re = require "ngx.re"
 local split = ngx_re.split
 
@@ -80,7 +81,10 @@ local init_data = function(data)
 end
 
 local get_temp_index = function(ptemp)
-    local temp = ptemp
+    if not ptemp then
+        l.err('ptemp is null')
+    end
+    local temp = ptemp or 0
     if temp < 12 then
         temp = 12
     elseif temp > 35 then
@@ -99,6 +103,11 @@ local get_humi_index = function(phumi)
         humi_list = _M.humi
     end
 
+    if not phumi then
+        l.err('phumi is null')
+    end
+
+    phumi = phumi or 0
     local humi = phumi
     if phumi > humi_list[1] then
         humi = humi_list[1]

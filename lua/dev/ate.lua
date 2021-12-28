@@ -8,13 +8,15 @@ local Task  = require "lib.task"
 
 local format = string.format
 local lshift = bit.lshift
+local rshift = bit.rshift
 local band   = bit.band
 local format_bytes = util.format_bytes
+local nulltonil = util.nulltonil
 
 local log = ngx.log
 local ERR = ngx.ERR
--- local DBG = ngx.DEBUG
--- local ins = require 'lib.inspect'
+local DBG = ngx.DEBUG
+local ins = require 'lib.inspect'
 
 local Ate = {}
 Ate.__index = Ate
@@ -103,12 +105,12 @@ end
 Ate.set_data_index = function(self, index, val, serialize)
     local data = self.data
     local nindex = 3 + (index * 2)
-    if nindex > #data then
-        ngx.say('index:', index)
-        return nil
-    end
+    -- if nindex > #data then
+    --     ngx.say('index:', index)
+    --     return nil
+    -- end
     self.health = ds.DEV_HEALTH_ONLINE
-    local highbits = band(val, 0xff00)
+    local highbits = rshift(band(val, 0xff00), 8)
     local lowbits  = band(val, 0x00ff)
     data[nindex - 1] = highbits
     data[nindex] = lowbits
@@ -137,11 +139,11 @@ end
 local get = function(self, index)
   local data = self.data
   local nindex = 3 + (index * 2)
-  if nindex > #data then
-      return nil
-  end
+  -- if nindex > #data then
+  --     return nil
+  -- end
   if self.health ~= ds.DEV_HEALTH_OFFLINE then
-      return lshift(data[nindex - 1], 8) + data[nindex]
+      return lshift((data[nindex - 1] or 0), 8) + (data[nindex] or 0)
   end
   return nil
 end
@@ -168,15 +170,17 @@ Ate.get_pm25 = function(self)
 end
 
 Ate.get_temp = function(self)
-    local status = get(self,6)
+    local status = get(self, 6)
     if status == 0 then
+        log(DBG, get(self, 13))
         return get(self, 13)
     end
     return nil
 end
 Ate.get_humi = function(self)
-    local status = get(self,7)
+    local status = get(self, 7)
     if status == 0 then
+        log(DBG, get(self, 14))
         return get(self, 14)
     end
     return nil
@@ -195,7 +199,7 @@ Ate.serialization = function(self)
     }
     local key = get_key(dev_config.name, self.addr)
     local d_str = cjson.encode(d)
-    -- log(ERR, d_str)
+    log(ERR, d_str)
     local redis = helprd.get()
     redis:set(key, d_str)
     return  true
@@ -206,14 +210,15 @@ Ate.unserialization = function(self)
     -- local d_str = cjson.encode(d)
     local redis = helprd.get()
     local d_str = redis:get(key)
-    log(ERR, d_str)
+    -- log(ERR, d_str)
     if d_str then
         local d = cjson.decode(d_str)
         if d then
-            self.data = d.data
+            self.data = nulltonil(d.data)
             self.health = d.health
             self.sick_count = d.sick_count
             self.ts = d.ts
+            log(ERR, ins(d))
             return  true
         end
     end

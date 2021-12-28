@@ -1,5 +1,6 @@
 local _M = {}
 local ngx_re = require "ngx.re"
+local isarray    = require 'table.isarray'
 local split = ngx_re.split
 local format = string.format
 
@@ -27,4 +28,14 @@ _M.hex = function(v)
   return format('0x%02X', v)
 end
 
+_M.nulltonil = function(list)
+    if list and isarray(list) then
+        for i,v in ipairs(list) do
+            if type(v) == 'userdata' then
+                list[i] = nil
+            end
+        end
+    end
+    return list
+end
 return _M

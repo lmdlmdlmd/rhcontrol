@@ -69,6 +69,14 @@ local _M = {
     -- HOLD_ADDR_WTS2 = 22,
     -- HOLD_ADDR_WTS3 = 23,
     HOLD_ADDR_SYNC = 24,
+
+    hold_names = {
+        'DWK','JSK','DHV','FAV','FAK','FAO','EAK','EAO','FAX','EAX','SYNC'
+    }
 }
+
+_M.get_hold_name = function(index)
+    return _M['hold_names'][index] or 'nil'
+end
 
 return _M

@@ -9,7 +9,11 @@ do
     end
 
     local ate1 = Ate.new(0xf)
-    ngx.say(ate1:set_data_index(10, 252, false))
+    -- ate1:unserialization()
+    ngx.say(ate1:set_data_index(3, 0, false))
+    ngx.say(ate1:set_data_index(6, 0, false))
+    ngx.say(ate1:set_data_index(7, 0, false))
+    ngx.say(ate1:set_data_index(10, 250, false))
     ngx.say(ate1:set_data_index(13, 156, false))
     ngx.say(ate1:set_data_index(14, 678, true))
 

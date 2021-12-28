@@ -19,7 +19,7 @@ local HOST = '192.168.254.7'
 
 local log = ngx.log
 local ERR = ngx.ERR
--- local DBG = ngx.DEBUG
+local DBG = ngx.DEBUG
 -- local ins = require 'lib.inspect'
 local format = string.format
 
@@ -59,7 +59,7 @@ _M.run = function()
         local home_humi = ate:get_humi()
         local home_pm25 = ate:get_pm25()
         local home_19 = ate:get(19)
-        l.log(format(
+        log(DBG, format(
               'temp = %d, humi = %d, pm25 = %d, 19 = %d',
               home_temp or 0, home_humi or 0, home_pm25 or 0, home_19 or 0)
         )
