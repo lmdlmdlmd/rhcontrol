@@ -3,12 +3,16 @@ local l = require 'lib.log'
 local Fan = require 'lib.fan'
 local ds  = require 'lib.ds'
 
+local log = ngx.log
+local ERR = ngx.ERR
+local DBG = ngx.DEBUG
+
 -- ??????? when to stop xin wind
 -- 什么情况下停止新风? 现在依据的时候配置层面做的事情
 -- 夏季湿度高也需要关掉？？？？？
 -- FAK=1 always 打开
 _M.letin = function(mode, redis, p_ruihe, p_fan)
-    l.log('enter into letin:', mode)
+    log(DBG, 'enter into letin:', mode)
     local far = p_fan:get(Fan.INPUT_ADDR_FAR)
     local fae = p_fan:get(Fan.INPUT_ADDR_FAE)
     local fax = p_ruihe.get('FAX') -- 送风档位

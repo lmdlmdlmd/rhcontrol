@@ -40,6 +40,11 @@ local _M = {
     INPUT_ADDR_HEALTH  = 16,
     INPUT_ADDR_HEARTBEAT = 17,
 
+    input_names = {
+        "VER", "XLW1", "XLW2", "FPR", "FAR", "FAE", "EAR", "EAE", "RAT1", "RAH1", "FAT1",
+        "FAH1", "SAT1", "SAH1","DHT1","HWID", "HEALTH", "HEARTBEAT"
+    },
+
     -- hold registers
     HOLD_ADDR_TEST = 0,
     HOLD_ADDR_DWK = 1, --新风直膨主机, **可能没有**
@@ -68,14 +73,20 @@ local _M = {
     -- HOLD_ADDR_WTS1 = 21,
     -- HOLD_ADDR_WTS2 = 22,
     -- HOLD_ADDR_WTS3 = 23,
-    HOLD_ADDR_SYNC = 24,
+    HOLD_ADDR_SYNC = 11,
 
     hold_names = {
-        'DWK','JSK','DHV','FAV','FAK','FAO','EAK','EAO','FAX','EAX','SYNC'
+        'TEST','DWK','JSK','DHV','FAV','FAK','FAO','EAK','EAO','FAX','EAX','SYNC'
     }
 }
 
+_M.get_input_name = function(index)
+    index = index + 1
+    return _M['input_names'][index] or 'nil'
+end
+
 _M.get_hold_name = function(index)
+    index = index + 1
     return _M['hold_names'][index] or 'nil'
 end
 

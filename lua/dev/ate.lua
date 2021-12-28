@@ -12,11 +12,12 @@ local rshift = bit.rshift
 local band   = bit.band
 local format_bytes = util.format_bytes
 local nulltonil = util.nulltonil
+local emptytable = util.emptytable
 
 local log = ngx.log
 local ERR = ngx.ERR
 local DBG = ngx.DEBUG
-local ins = require 'lib.inspect'
+-- local ins = require 'lib.inspect'
 
 local Ate = {}
 Ate.__index = Ate
@@ -35,10 +36,8 @@ function Ate.new(addr, host, port)
     self.addr = addr or 0xf -- default addr is 0x0f
     self.host = host
     self.port = port
-    self.data = {0,0,0,0,0,0,0,0,0,0}
-    for _ = 1, 1, 40 do
-        self.data[#self.data + 1 ] = 0
-    end
+    self.data = {}
+    emptytable(self.data, 40)
     self.read_all_cmd = nil
     self.health = ds.DEV_HEALTH_OFFLINE
     self.sick_count = 0
@@ -199,7 +198,7 @@ Ate.serialization = function(self)
     }
     local key = get_key(dev_config.name, self.addr)
     local d_str = cjson.encode(d)
-    log(ERR, d_str)
+    -- log(ERR, d_str)
     local redis = helprd.get()
     redis:set(key, d_str)
     return  true
@@ -218,7 +217,7 @@ Ate.unserialization = function(self)
             self.health = d.health
             self.sick_count = d.sick_count
             self.ts = d.ts
-            log(ERR, ins(d))
+            -- log(ERR, ins(d))
             return  true
         end
     end

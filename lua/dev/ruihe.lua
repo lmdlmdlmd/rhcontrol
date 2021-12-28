@@ -1,6 +1,10 @@
 local helprd = require "lib.helpredis"
 local cjson  = require "cjson.safe"
 
+local log = ngx.log
+-- local ERR = ngx.ERR
+local DBG = ngx.DEBUG
+
 -- 瑞和的一个虚拟设备，用来表示整个的对外的设备情况
 local _M = {
     data = {
@@ -45,9 +49,11 @@ _M.get = function(tp)
 end
 
 _M.set_alarm = function( i ) -- luacheck: ignore
+    log(DBG, 'raise alarm:', i)
 end
 
 _M.clear_alarm = function( i) -- luacheck: ignore
+    log(DBG, 'clear alarm:', i)
 end
 
 _M.serialization = function()

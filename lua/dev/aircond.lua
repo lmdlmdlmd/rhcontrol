@@ -3,19 +3,23 @@ local crc16 = require "lib.crc16"
 local util  = require "lib.util"
 local Air   = require "lib.air"
 local Task  = require "lib.task"
-local l = require "lib.log"
+-- local l = require "lib.log"
 local bit   = require "bit"
 local cjson  = require "cjson.safe"
 local helprd = require "lib.helpredis"
 
 local format = string.format
 local lshift = bit.lshift
-local format_bytes = util.format_bytes
+local rshift = bit.rshift
+local band   = bit.band
+-- local format_bytes = util.format_bytes
+local nulltonil = util.nulltonil
+local emptytable = util.emptytable
 
 local log = ngx.log
 local ERR = ngx.ERR
 local DBG = ngx.DEBUG
-local ins = require 'lib.inspect'
+-- local ins = require 'lib.inspect'
 
 local Aircond = {}
 Aircond.__index = Aircond
@@ -43,6 +47,8 @@ function Aircond.new(addr, host, port)
     self.port = port
     self.input_data = {}
     self.hold_data = {}
+    emptytable(self.input_data, Air.INPUT_ADDR_HEARTBEAT + 1)
+    emptytable(self.hold_data, Air.HOLD_ADDR_SYNC + 1)
     self.read_input_cmd = nil
     self.read_hold_cmd = nil
     self.health = ds.DEV_HEALTH_OFFLINE
@@ -54,7 +60,7 @@ function Aircond.get_read_cmd(self, tp)
     local addr = self.addr
 
     local config = dev_config.input_registetr
-    if tp == 'hold' then
+    if tp == ds.HOLD_REG then
         config = dev_config.hold_register
         if self.read_hold_cmd then
             return self.read_hold_cmd
@@ -71,7 +77,7 @@ function Aircond.get_read_cmd(self, tp)
     local crc_list = crc16(cmd)
     cmd[#cmd + 1] = crc_list[1]
     cmd[#cmd + 1] = crc_list[2]
-    if tp == 'hold' then
+    if tp == ds.HOLD_REG then
         self.read_hold_cmd = cmd
     else
         self.read_input_cmd = cmd
@@ -90,15 +96,40 @@ Aircond.set_data = function(self, newdata, start, tp)
     self.health = ds.DEV_HEALTH_ONLINE
     self.sick_count = 0
     local data = self.input_data
-    if tp == 'hold' then
+    if tp == ds.HOLD_REG then
         data = self.hold_data
     end
     start = start or 0
     for i, v in ipairs(newdata) do
         data[i + start] = v
-        -- log(ERR, i+start, '=', v)
+        log(ERR, i+start, '=', v)
     end
     Aircond.serialization(self)
+    return true
+end
+
+Aircond.set_data_index = function(self, index, val, tp, serialize)
+    local data = self.input_data
+    if tp == ds.HOLD_REG then
+        data = self.hold_data
+    end
+    -- 这个地方的数据的取数规则可能不一定是这样的，
+    -- 要和实际的数据进行对接测试  熊佳斌
+    index = index + 1
+    local nindex = 3 + (index * 2)
+    -- if nindex > #data then
+    --     ngx.say('index:', index)
+    --     return nil
+    -- end
+    self.health = ds.DEV_HEALTH_ONLINE
+    local highbits = rshift(band(val, 0xff00), 8)
+    local lowbits  = band(val, 0x00ff)
+    data[nindex - 1] = highbits
+    data[nindex] = lowbits
+
+    if serialize then
+        Aircond.serialization(self)
+    end
     return true
 end
 
@@ -131,11 +162,16 @@ local get = function(self, data, index)
     if not data then return nil end
     index = index + 1
     local nindex = 3 + (index * 2)
-    if nindex > #data then
-      return nil
+    -- if nindex > #data then
+    --   return nil
+    -- end
+    local high = data[nindex - 1]
+    local low  = data[nindex]
+    if not high or not low then
+        return nil
     end
     if self.health ~= ds.DEV_HEALTH_OFFLINE then
-      return lshift(data[nindex - 1], 8) + data[nindex]
+        return lshift(high, 8) + low
     end
     return nil
 end
@@ -220,8 +256,8 @@ Aircond.unserialization = function(self)
     if d_str then
         local d = cjson.decode(d_str)
         if d then
-            self.input_data = d.input_data
-            self.hold_data = d.hold_data
+            self.input_data = nulltonil(d.input_data)
+            self.hold_data = nulltonil(d.hold_data)
             self.health = d.health
             self.sick_count = d.sick_count
             self.ts = d.ts
@@ -234,8 +270,24 @@ end
 Aircond.__tostring = function(self)
     local str = {}
     str[#str + 1] = format('aircond:%d, health=%d', self.addr, self.health)
-    str[#str + 1] = format('input_data: %s', format_bytes(self.input_data))
-    str[#str + 1] = format('hold_data: %s', format_bytes(self.hold_data))
+    str[#str + 1] = 'input_data:'
+    for i = Air.INPUT_ADDR_VER, Air.INPUT_ADDR_HEARTBEAT, 1 do
+        local v = Aircond.get(self, i)
+        if v then
+            v = format("0x%x", v)
+        end
+        str[#str + 1] =
+            format("%s = %s", Air.get_input_name(i), v)
+    end
+    str[#str + 1] = format('hold_data:')
+    for i = Air.HOLD_ADDR_TEST, Air.HOLD_ADDR_SYNC, 1 do
+      local v = Aircond.get_hold(self, i)
+      if v then
+          v = format("0x%x", v)
+      end
+      str[#str + 1] =
+          format("%s = %s", Air.get_hold_name(i), v)
+    end
     return table.concat(str, "\r\n")
 end
 

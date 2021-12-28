@@ -1,6 +1,6 @@
 local _M = {}
 local monitor = require 'hal.monitor'
-local l = require 'lib.log'
+-- local l = require 'lib.log'
 local Ate = require 'dev.ate'
 local Newfan = require 'dev.newfan'
 -- local Fan = require 'lib.fan'
@@ -39,6 +39,8 @@ end
 
 
 _M.run = function()
+
+    log(DBG, 'BEGIN ************************* BEGIN')
     -- get all provision data from redis
     ruihe.serialization()
 
@@ -70,11 +72,13 @@ _M.run = function()
     temp.heat(mode, redis, ruihe, fan1, air1)
     wind.letin(mode, redis, ruihe, fan1)
 
-    operation.write()
+    -- operation.write()
 
-    -- log(ERR, ate)
-    -- log(ERR, fan1)
+    log(ERR, ate)
+    log(ERR, fan1)
     log(ERR, air1)
+
+    log(DBG, 'END ************************* END')
 end
 
 -- _M.init()

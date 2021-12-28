@@ -29,6 +29,11 @@ local _M = {
   INPUT_ADDR_HT1 = 9, -- 热水循环  温度
   INPUT_ADDR_HEALTH = 10,
   INPUT_ADDR_HEARTBEAT = 11,
+  input_names = {
+      "VER",
+      "SPR1", "SPE1", "SPR2", "HPE", "HWID1", "HIID2", "ST1", "HT1", "HEALTH",
+      "HEARTBEAT"
+  },
 
   HOLD_ADDR_TEST = 0,
   HOLD_ADDR_SPO1 = 1, -- 二次水泵1  手动/自动, debug用
@@ -60,16 +65,25 @@ local _M = {
   -- PF3=1，PF3K=0，代表“高档”
   HOLD_ADDR_PF3  = 16,
   HOLD_ADDR_PF3K = 17,
-  HOLD_ADDR_MODE = 18,
-  HOLD_ADDR_SYNC = 19,
+
+  HOLD_ADDR_MC3K = 18, -- 空调水机组主机 3, 可能不存在
+
+  HOLD_ADDR_MODE = 19,
+  HOLD_ADDR_SYNC = 20,
 
   hold_names = {
-      'SPO1','SPK1','SPO2','SPK2','MC1K','MC2K','CMV','HMV','HPK','HPO',
+      'TEST','SPO1','SPK1','SPO2','SPK2','MC1K','MC2K','CMV','HMV','HPK','HPO',
       'HBK', 'PF1', 'PF1K','PF2', 'PF2K', 'PF3', 'PF3K', 'MODE', 'SYNC'
   }
 }
 
+_M.get_input_name = function(index)
+    index = index + 1
+    return _M['input_names'][index] or 'nil'
+end
+
 _M.get_hold_name = function(index)
+    index = index + 1
     return _M['hold_names'][index] or 'nil'
 end
 

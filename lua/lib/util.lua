@@ -38,4 +38,12 @@ _M.nulltonil = function(list)
     end
     return list
 end
+
+_M.emptytable = function(list, len)
+    for _ = 1, 1, len do
+        list[#list + 1 ] = 0
+    end
+    return list
+end
+
 return _M

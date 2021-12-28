@@ -7,8 +7,12 @@ local ds  = require 'lib.ds'
 local ONE_DEGREE = 1
 local THREE_DEGREE  = 3 * ONE_DEGREE
 
+local log = ngx.log
+local ERR = ngx.ERR
+local DBG = ngx.DEBUG
+
 _M.heat = function(mode, redis, p_ruihe, p_fan, p_air)
-    l.log('enter into heat:', mode)
+    log(DBG, 'enter into heat:', mode)
     local rat1 = p_fan:get(Fan.INPUT_ADDR_RAT1) -- 室内回风温度
     -- local fat1 = p_fan:get(Fan.INPUT_ADDR_FAT1) -- 新风温度（室外）
     local st1 = p_air:get(Air.INPUT_ADDR_ST1) -- 二次水温
@@ -78,7 +82,7 @@ _M.heat = function(mode, redis, p_ruihe, p_fan, p_air)
 end
 
 _M.cool = function(mode, redis, p_ruihe, _, p_air)
-    l.log('enter into cool:', mode)
+    log(DBG, 'enter into cool:', mode)
     local sts1 = p_ruihe.get('STS1') -- 夏季毛细管设定温度
     local st1 = p_air:get(Air.INPUT_ADDR_ST1) -- 二次水温
 

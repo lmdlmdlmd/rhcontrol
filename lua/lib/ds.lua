@@ -16,4 +16,8 @@ _M.ALARM_SPE2 = 4
 _M.COLD_MODE = 1
 _M.HOT_MODE = 2
 
+_M.INPUT_REG = 1
+_M.HOLD_REG  = 2
+
+
 return _M

@@ -4,10 +4,14 @@ local Fan = require 'lib.fan'
 local Air = require 'lib.air'
 local ds = require 'lib.ds'
 
+local log = ngx.log
+local ERR = ngx.ERR
+local DBG = ngx.DEBUG
+
 -- 加湿
 -- 把水加入到空气， 水打开，加热加水（空调加热）
 _M.add = function(mode, redis, p_ruihe, p_fan, p_air)
-  l.log('enter into add:', mode)
+  log(DBG, 'enter into add:', mode)
   local rah1 = p_fan:get(Fan.INPUT_ADDR_RAH1) --室内回风湿度
   local ld2 = p_fan:get_ld2() -- 送风露点,送风温度和湿度计算出来的数值
   local lds2 = p_ruihe.get('LDS2') -- 送风露点保护设定值
@@ -57,7 +61,7 @@ end
 
 -- 除湿
 _M.minus = function(mode, redis, p_ruihe, p_fan, p_air)
-    l.log('enter into minus:', mode)
+    log(DBG, 'enter into minus:', mode)
     local rah1 = p_fan:get(Fan.INPUT_ADDR_RAH1) -- 室内回风湿度
     local rahs1 = p_ruihe.get('RAHS1') -- 设定除湿湿度
     local h9 = p_ruihe.get('H9') -- 高风险湿度偏差值
