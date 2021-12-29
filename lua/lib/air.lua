@@ -17,7 +17,7 @@ local _M = {
   INPUT_ADDR_SPR1 = 1, --二次水泵1  运行状态 默认为, 未启动:1; 已启动，读出:0
   INPUT_ADDR_SPE1 = 2, --二次水泵1  故障状态 默认为，正常:1; 0 代表故障
   INPUT_ADDR_SPR2 = 3, --二次水泵2  运行状态
-  INPUT_ADDR_SPE2 = 4, --二次水泵1  故障状态
+  INPUT_ADDR_SPE2 = 4, --二次水泵2  故障状态
   INPUT_ADDR_HPE  = 5, --热水循环  水泵故障状态
   -- HW_ID2=0，HWID1=0，“不共用主机”
   -- HW_ID2=0，HWID1=1，“共用MC1”

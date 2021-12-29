@@ -1,5 +1,5 @@
 local _M = {}
-local l = require 'lib.log'
+-- local l = require 'lib.log'
 local Fan = require 'lib.fan'
 local ds  = require 'lib.ds'
 
@@ -21,8 +21,14 @@ _M.letin = function(mode, redis, p_ruihe, p_fan)
     local fat1 = p_fan:get(Fan.INPUT_ADDR_FAT1) --新风温度（室外)
     local wts3 = p_ruihe.get('WTS3') -- 冬季低温设定温度
 
-    if not far or not fae or not fax or not eax or not fat1 or not wts3 then
-        l.log('SOMETHING WRONG IN wind, invalid values')
+    if not far or not fae or not fax or not eax or not wts3 then
+        log(ERR, 'SOMETHING WRONG IN wind, invalid values',
+             '\r\nfar = ', far,
+             '\r\nfae = ', fae,
+             '\r\nfax = ', fax,
+             '\r\neax = ', eax,
+             '\r\nfat1 = ',fat1,
+             '\r\nwts3 = ', wts3)
         return
     end
 
@@ -45,7 +51,9 @@ _M.letin = function(mode, redis, p_ruihe, p_fan)
     p_fan:set(redis, Fan.HOLD_ADDR_EAX, eax)
 
     local FAV -- 新风风阀
-    if fat1 < wts3 then
+    -- fat1可能没有，那么怎么判断这个要不要打开和关闭, 12/29???
+    -- 默认不关闭fav
+    if fat1 and fat1 < wts3 then
         FAV = 0
     else
         if fax > 0 or eax > 0 then
@@ -69,18 +77,18 @@ end
 --     报警提示XLW1堵塞
 -- If  XLW2=1（高效过滤网压差开关开启）  then
 --     报警提示XLW2堵塞
-_M.is_xlw = function( p_ruihe, p_fan)
+_M.is_xlw = function(p_ruihe, p_fan)
     local xlw1 = p_fan:get(Fan.INPUT_ADDR_XLW1)
     local xlw2 = p_fan:get(Fan.INPUT_ADDR_XLW1)
 
-    if xlw1 then
+    if xlw1 == 1 then
         p_ruihe.set_alarm(ds.ALARM_XLW1)
-    else
+    elseif xlw1 == 0 then
         p_ruihe.clear_alarm(ds.ALARM_XLW1)
     end
-    if xlw2 then
+    if xlw2 == 1 then
         p_ruihe.set_alarm(ds.ALARM_XLW2)
-    else
+    elseif xlw2 == 0 then
         p_ruihe.clear_alarm(ds.ALARM_XLW2)
     end
 end

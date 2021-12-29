@@ -8,6 +8,7 @@ local Aircond = require 'dev.aircond'
 -- local Air = require 'lib.air'
 local operation = require 'hal.operation'
 -- local hex = require 'lib.util'.hex
+local ds      = require "lib.ds"
 local helprd  = require "lib.helpredis"
 local ruihe = require 'dev.ruihe'
 local humi = require 'init.humi'
@@ -42,7 +43,7 @@ _M.run = function()
 
     log(DBG, 'BEGIN ************************* BEGIN')
     -- get all provision data from redis
-    ruihe.serialization()
+    ruihe.unserialization()
 
     monitor.read_input()
     ngx.sleep(1)
@@ -52,7 +53,7 @@ _M.run = function()
     local ate = monitor.get('ate')
     local fan1 = monitor.get('newfan1')
     local air1 = monitor.get('aircond1')
-    local mode = ruihe.get('mode')
+    local mode = ruihe.get('MODE')
 
     local redis = helprd.get()
 
@@ -67,18 +68,30 @@ _M.run = function()
         )
     end
 
+    log(DBG, 'mode:', ds.MODES[mode])
+    if mode == ds.MODE_SUMMER_COLD then
+        humi.add(mode, redis, ruihe, fan1, air1)
+        temp.cool(mode, redis, ruihe, fan1, air1)
+        wind.letin(mode, redis, ruihe, fan1)
+    elseif mode == ds.MODE_WINTER_HEAT then
+        humi.add(mode, redis, ruihe, fan1, air1)
+        temp.heat(mode, redis, ruihe, fan1, air1)
+        wind.letin(mode, redis, ruihe, fan1)
+    else
+        log(DBG, 'not support mode:',  mode)
+    end
 
-    humi.add(mode, redis, ruihe, fan1, air1)
-    temp.heat(mode, redis, ruihe, fan1, air1)
-    wind.letin(mode, redis, ruihe, fan1)
+    wind.is_xlw(ruihe, fan1)
 
     -- operation.write()
 
-    log(ERR, ate)
-    log(ERR, fan1)
-    log(ERR, air1)
+    -- log(DBG, ate)
+    -- log(DBG, fan1)
+    -- log(DBG, air1)
+    log(DBG, ruihe.tostring())
 
     log(DBG, 'END ************************* END')
+    log(DBG, '\r\n\r\n\r\n')
 end
 
 -- _M.init()

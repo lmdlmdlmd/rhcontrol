@@ -1,5 +1,5 @@
 local _M = {}
-local l = require 'lib.log'
+-- local l = require 'lib.log'
 local Fan = require 'lib.fan'
 local Air = require 'lib.air'
 local ds  = require 'lib.ds'
@@ -20,7 +20,7 @@ _M.heat = function(mode, redis, p_ruihe, p_fan, p_air)
     local sts2 = p_ruihe.get('STS2') -- 冬季毛细管供水设定温度
 
     if not rat1 or not st1 or not wts2 or not sts2 then
-        l.log('SOMETHING WRONG IN HEAR, NO VALID VALUE')
+        log(ERR, 'SOMETHING WRONG IN HEAR, NO VALID VALUE')
         return
     end
 
@@ -116,7 +116,7 @@ _M.cool = function(mode, redis, p_ruihe, _, p_air)
 end
 
 _M.pump = function(mode, redis, p_ruihe, p_fan, p_air)
-    l.log('enter into pump:', mode)
+    log(DBG, 'enter into pump:', mode)
     local ld1 = p_fan:get_ld1()
     local sts1 = p_ruihe.get('STS1')
     -- 二次水泵1 运行状态 默认为, 未启动:1; 已启动，读出:0

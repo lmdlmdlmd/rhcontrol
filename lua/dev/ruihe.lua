@@ -1,14 +1,16 @@
 local helprd = require "lib.helpredis"
 local cjson  = require "cjson.safe"
+local ds     = require "lib.ds"
 
 local log = ngx.log
 -- local ERR = ngx.ERR
 local DBG = ngx.DEBUG
+local ins = require 'lib.inspect'
 
 -- 瑞和的一个虚拟设备，用来表示整个的对外的设备情况
 local _M = {
     data = {
-        MODE = 0, -- 模式
+        MODE = 1, -- 模式
         RAHS1 = 0, --设定除湿湿度
         RAHS2 = 0, -- 冬季加湿设定湿度(室内回风湿度的临界值)
         DHST1 = 0, -- 盘管保护设定温度
@@ -25,7 +27,8 @@ local _M = {
         WTS3 = 0, -- 冬季低温设定温度,
         STS1 = 0, -- 夏季毛细管设定温度
         STS2 = 0, -- 冬季毛细管供水设定温度
-    }
+    },
+    alarms = {}
 }
 -- local format = string.format
 
@@ -33,12 +36,14 @@ local get_key = function()
     return 'ruihe:set'
 end
 
-_M.set = function(tp, val)
+_M.set = function(tp, val, serialize)
     local data = _M.data
     val = tonumber(val)
     if val ~= data[tp] then
         data[tp] = val
-        _M.serialization()
+        if not(serialize == false) then
+            _M.serialization()
+        end
     end
 end
 
@@ -48,12 +53,22 @@ _M.get = function(tp)
     return data[tp]
 end
 
-_M.set_alarm = function( i ) -- luacheck: ignore
-    log(DBG, 'raise alarm:', i)
+_M.set_alarm = function( i )
+    local alarms = _M.alarms
+    -- log(DBG, 'set alarm:' .. i)
+    if not alarms[i] or alarms[i] == 0 then
+        log(DBG, 'raise alarm:', ds.ALARMS[i] or i)
+        alarms[i] = 1
+    end
 end
 
-_M.clear_alarm = function( i) -- luacheck: ignore
-    log(DBG, 'clear alarm:', i)
+_M.clear_alarm = function( i)
+    local alarms = _M.alarms
+    -- log(DBG, 'clear alarm:' .. i)
+    if alarms[i] and alarms[i] > 0 then
+        log(DBG, 'clear alarm:', ds.ALARMS[i] or i)
+        alarms[i] = 0
+    end
 end
 
 _M.serialization = function()
@@ -80,6 +95,15 @@ _M.unserialization = function()
         end
     end
     return  false
+end
+
+_M.tostring = function()
+    local str = {}
+    str[#str + 1] = 'data:'
+    str[#str + 1] = ins(_M.data)
+    str[#str + 1] = 'alarms:'
+    str[#str + 1] = ins(_M.alarms)
+    return table.concat(str, "\r\n")
 end
 
 return _M

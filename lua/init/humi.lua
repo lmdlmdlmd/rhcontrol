@@ -1,11 +1,11 @@
 local _M = {}
-local l = require 'lib.log'
+-- local l = require 'lib.log'
 local Fan = require 'lib.fan'
 local Air = require 'lib.air'
 local ds = require 'lib.ds'
 
 local log = ngx.log
-local ERR = ngx.ERR
+-- local ERR = ngx.ERR
 local DBG = ngx.DEBUG
 
 -- 加湿

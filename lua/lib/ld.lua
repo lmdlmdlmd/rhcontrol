@@ -2,6 +2,10 @@ local l     = require "lib.log"
 local ngx_re = require "ngx.re"
 local split = ngx_re.split
 
+local log = ngx.log
+local ERR = ngx.ERR
+-- local DBG = ngx.DEBUG
+
 local _M = {
     humi = nil,
     data = {}
@@ -82,7 +86,7 @@ end
 
 local get_temp_index = function(ptemp)
     if not ptemp then
-        l.err('ptemp is null')
+        log(ERR, 'ptemp is null')
     end
     local temp = ptemp or 0
     if temp < 12 then
@@ -104,7 +108,7 @@ local get_humi_index = function(phumi)
     end
 
     if not phumi then
-        l.err('phumi is null')
+        log(ERR, 'phumi is null')
     end
 
     phumi = phumi or 0
