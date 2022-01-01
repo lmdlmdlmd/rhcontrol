@@ -23,6 +23,24 @@ _M.stringtotable = function(str)
     return ret
 end
 
+-- assume data is only bytes data
+_M.tabletostring = function(data)
+    if not data then return '' end
+    local td = type(data)
+    if td == 'string' then
+        return data
+    elseif td == 'number' then
+        return string.char(data)
+    elseif td == 'table' then
+        local n = {}
+        for _, v in ipairs(data) do
+            n[#n + 1] = string.char(v)
+        end
+        return table.concat(n)
+    end
+    return ''
+end
+
 _M.hex = function(v)
   if not v then return nil end
   return format('0x%02X', v)
