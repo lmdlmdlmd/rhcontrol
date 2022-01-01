@@ -1,4 +1,4 @@
-local l     = require "lib.log"
+-- local l     = require "lib.log"
 local ngx_re = require "ngx.re"
 local split = ngx_re.split
 
