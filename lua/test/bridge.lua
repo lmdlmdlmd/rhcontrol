@@ -2,6 +2,7 @@ local util = require 'lib.util'
 local net  = require 'lib.net'
 local crc16 = require 'lib.crc16'
 
+
 local sm4_class  = require 'lib.sm4'
 local format_bytes = util.format_bytes
 local stringtotable = util.stringtotable
@@ -22,11 +23,12 @@ local header = {
   0x00, 0x01,
 }
 local devid = stringtotable('410108S101QLS00001')
+-- local devidn = stringtotable('S101410108QLS00002')
 for _,v in ipairs(devid) do
   header[#header + 1] = v
 end
 local time = {
-  0x14,0x15,12,31,17,30,35
+  20,22,17,31,18,30,35
 }
 for _,v in ipairs(time) do
   header[#header + 1] = v
@@ -34,23 +36,24 @@ end
 print("header length = ", #header)
 local register_msg = {
   0x07,
-  0x40,0x41, 0x20,0x20,0x20,
+  string.byte('Y'),string.byte('X'), 0x20,0x20,0x20
 }
 for _,v in ipairs(devid) do
   register_msg[#register_msg + 1] = v
 end
-register_msg[#register_msg + 1] = 0x20
-register_msg[#register_msg + 1] = 0x20
+register_msg[#register_msg + 1] = 0x00
+register_msg[#register_msg + 1] = 0x00
 
 for _,v in ipairs(devid) do
   register_msg[#register_msg + 1] = v
 end
 
 local lng = {
-  0x40,0x5c,0x63,0x33,0x9e,0xca,0x42,0x20
+  -- 0x40,0x5c,0x63,0x33,0x9e,0xca,0x42,0x20
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 }
 local lat = {
-  0x40,0x5c,0x63,0x33,0x9e,0xca,0x42,0x20
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 }
 for _,v in ipairs(lng) do
   register_msg[#register_msg + 1] = v
@@ -67,9 +70,9 @@ for _,v in ipairs(ip) do
   register_msg[#register_msg + 1] = v
 end
 register_msg[#register_msg + 1] = 0x00
-register_msg[#register_msg + 1] = 0x50
-register_msg[#register_msg + 1] = 0xbb
-register_msg[#register_msg + 1] = 0xbb
+register_msg[#register_msg + 1] = 0x10
+register_msg[#register_msg + 1] = 0x00
+register_msg[#register_msg + 1] = 22
 register_msg[#register_msg + 1] = 0x01
 local manu_time = stringtotable('20200707')
 for _,v in ipairs(manu_time) do
@@ -144,7 +147,7 @@ msg[#msg + 1] = 0x7e
 
 ngx.say(format_bytes(msg))
 
-ngx.say(tabletostring(msg))
+-- ngx.say(tabletostring(msg))
 local readdata, err = net.send('222.143.32.246',8001, msg)
 ngx.say(readdata)
 ngx.say(ins(format_bytes(stringtotable(readdata))))

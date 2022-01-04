@@ -8,7 +8,7 @@ local statemachine = require 'init.statemachine'
 check = function(premature)
 
     local tasks = {
-        statemachine
+        -- statemachine
     }
    if not premature then
        for _, f in ipairs(tasks) do
