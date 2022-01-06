@@ -13,7 +13,7 @@ local tabletostring = util.tabletostring
 
 local dtq = {}
 local devidprex = '410108S101QLS00'
-for index = 2, 2, 1 do
+for index = 6, 6, 1 do
     local devid
     if index < 10 then
         devid = devidprex .. '00' .. index

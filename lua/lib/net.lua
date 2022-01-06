@@ -41,10 +41,9 @@ _M.send = function(host, port, data, maxreadsize, timeout)
             -- log(DBG, 'sending ok:', host, ':', port, '=', format_bytes(data), ',len=', bytes)
         end
         -- ngx.say('send ok')
-        if timeout then
-            sock:settimeouts(10000,10000,timeout)
-        end
-        maxreadsize = maxreadsize or 102400
+        timeout = timeout or 60 * 1000
+        sock:settimeouts(timeout,timeout, timeout)
+        maxreadsize = maxreadsize or 1024000
         readdata, err = sock:receiveany(maxreadsize) -- received most 1k data
         if not readdata then
             log(ERR, 'receiveany failed:', err)

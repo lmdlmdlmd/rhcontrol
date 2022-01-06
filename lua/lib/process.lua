@@ -15,6 +15,9 @@ _M.before = function()
 
     if body_text then
         body_data = cjson.decode(body_text) or {}
+        if type(body_data) ~= 'table' then
+            return nil, body_data
+        end
         local new_body_data = {}
         for k, v in pairs(body_data) do
             -- remove userdata cases

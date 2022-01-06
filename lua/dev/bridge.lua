@@ -12,10 +12,10 @@ local stringtotable = util.stringtotable
 local tstoarray = util.tstoarray
 local write_double = util.write_double
 
-local log = ngx.log
+-- local log = ngx.log
 -- local ERR = ngx.ERR
-local DBG = ngx.DEBUG
-local ins = require 'lib.inspect'
+-- local DBG = ngx.DEBUG
+-- local ins = require 'lib.inspect'
 
 _M.make_header = function(tp, devidstr)
     local header = {
@@ -32,7 +32,7 @@ _M.make_header = function(tp, devidstr)
     for _,v in ipairs(devid) do
       header[#header + 1] = v
     end
-    local time = tstoarray()
+    local time = tstoarray() -- {20,21,1,5,1,1,1}
     for _,v in ipairs(time) do
       header[#header + 1] = v
     end
@@ -147,10 +147,14 @@ _M.make_body_data_env = function(data)
             elseif len == 1 then
                 newd = { band(value, 0x00ff) }
             else
-                log(DBG, ins(v))
+                -- log(DBG, ins(v))
+                return nil, string.format('int/float length =4 is not considered')
             end
         elseif vt == 'S' then
             local temp = stringtotable(value)
+            if len ~= #temp then
+                return nil, string.format('%s length is not %d', value, len)
+            end
             newd = {}
             for i = 1, len, 1 do
                 newd[i] = temp[i] or 0x20
