@@ -17,7 +17,7 @@ local write_double = util.write_double
 -- local DBG = ngx.DEBUG
 -- local ins = require 'lib.inspect'
 
-_M.make_header = function(tp, devidstr)
+_M.make_header = function(tp, devidstr, ts)
     local header = {
       0x07, --桥梁
       tp, --0x1:注册 0x2:鉴权
@@ -32,7 +32,7 @@ _M.make_header = function(tp, devidstr)
     for _,v in ipairs(devid) do
       header[#header + 1] = v
     end
-    local time = tstoarray() -- {20,21,1,5,1,1,1}
+    local time = tstoarray(ts) -- {20,21,1,5,1,1,1}
     for _,v in ipairs(time) do
       header[#header + 1] = v
     end

@@ -33,6 +33,7 @@ do
     local devid = body_data.dev_id
     local cmd   = body_data.cmd_code
     local data = body_data.body_data
+    local ts   = body_data.ts
 
     if not devid or not cmd or not body_data then
         ret.code = 100
@@ -50,7 +51,7 @@ do
     end
 
     log(DBG, 'auth:', devid)
-    local header = bridge.make_header(0x2, devid)
+    local header = bridge.make_header(0x2, devid, ts)
     local authcode = devids[devid]
     if not authcode then
         ret.code = 101
@@ -104,7 +105,7 @@ do
     end
 
     log(DBG, 'data')
-    header = bridge.make_header(cmd, devid)
+    header = bridge.make_header(cmd, devid, ts)
     body, err = bridge.make_body_data_env(data)
     if not body then
         ret.code = 104
