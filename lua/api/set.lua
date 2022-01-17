@@ -27,8 +27,7 @@ do
         if tp and index then
             fan1:unserialization()
             fan1:set_data_index(index, val, tp, true)
-
-            ret.msg = 'set ruihe:' .. name ..':' .. val
+            ret.msg = 'set fan:' .. name ..':' .. val
         else
             ret.msg = 'name no foud in list'
             goto exit
@@ -39,6 +38,8 @@ do
         if tp and index then
             air1:unserialization()
             air1:set_data_index(index, val, tp, true)
+            ret.msg = 'set air:' .. name ..':' .. val
+            ret.msg = ret.msg .. ',tp:' .. tp .. ',index:' ..index
         else
             ret.msg = 'name no found in list'
             goto exit

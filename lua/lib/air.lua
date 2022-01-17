@@ -75,7 +75,7 @@ local _M = {
 
   hold_names = {
       'TEST','SPO1','SPK1','SPO2','SPK2','MC1K','MC2K','CMV','HMV','HPK','HPO',
-      'HBK', 'PF1', 'PF1K','PF2', 'PF2K', 'PF3', 'PF3K', 'MODE', 'SYNC'
+      'HBK', 'PF1', 'PF1K','PF2', 'PF2K', 'PF3', 'PF3K', 'MC3K', 'MODE', 'SYNC'
   }
 }
 
@@ -105,6 +105,7 @@ _M.tp_index = function(name)
     if index then
         return ds.HOLD_REG, index
     end
+    return nil
 end
 
 return _M

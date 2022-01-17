@@ -118,7 +118,7 @@ Aircond.set_data_index = function(self, index, val, tp, serialize)
     index = index + 1
     local nindex = 3 + (index * 2)
     -- if nindex > #data then
-    --     ngx.say('index:', index)
+        -- ngx.say('index:', index)
     --     return nil
     -- end
     self.health = ds.DEV_HEALTH_ONLINE
