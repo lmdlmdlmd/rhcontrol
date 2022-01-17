@@ -1,3 +1,5 @@
+local util = require 'lib.util'
+local ds   = require 'lib.ds'
 -- 0x01,0x04,0x28,
 -- 0x00,0x00,
 -- 0x00,0x01, SPR1
@@ -31,7 +33,7 @@ local _M = {
   INPUT_ADDR_HEARTBEAT = 11,
   input_names = {
       "VER",
-      "SPR1", "SPE1", "SPR2", "HPE", "HWID1", "HIID2", "ST1", "HT1", "HEALTH",
+      "SPR1", "SPE1", "SPR2", "HPE", "HWID1", "HWID2", "ST1", "HT1", "HEALTH",
       "HEARTBEAT"
   },
 
@@ -81,10 +83,28 @@ _M.get_input_name = function(index)
     index = index + 1
     return _M['input_names'][index] or 'nil'
 end
+_M.get_input_index = function(val)
+    return util.index(_M['input_names'], val)
+end
 
 _M.get_hold_name = function(index)
     index = index + 1
     return _M['hold_names'][index] or 'nil'
+end
+_M.get_hold_index = function(val)
+    return util.index(_M['hold_names'], val)
+end
+
+_M.tp_index = function(name)
+    local index = _M.get_input_index(name)
+    if index then
+        return ds.INPUT_REG, index
+    end
+
+    index = _M.get_hold_index(name)
+    if index then
+        return ds.HOLD_REG, index
+    end
 end
 
 return _M

@@ -46,4 +46,19 @@ _M.emptytable = function(list, len)
     return list
 end
 
+_M.index = function(list, val)
+    if not list or not val then
+        return nil
+    end
+
+    -- start with zero
+    for i, v in ipairs(list) do
+        if v == val then
+            return i - 1
+        end
+    end
+
+    return nil
+end
+
 return _M

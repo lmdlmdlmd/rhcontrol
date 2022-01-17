@@ -35,49 +35,48 @@ _M.send = function(host, port, data, maxreadsize)
     local err, ok, readdata
     local bytes -- luacheck: ignore
 
-    -- log(DBG, 'sending ok:', host, ':', port, '=', format_bytes(data), ',len=', #data)
-    return true, nil
+    log(DBG, 'sending ok:', host, ':', port, '=', format_bytes(data), ',len=', #data)
 
-    -- local lockname = format('hp:%s:%s', host, port)
-    -- local mylock = lock.lock(lockname)
-    --
-    -- do
-    --     ok, err = sock:connect(host, port)
-    --     if not ok then
-    --         log(ERR, 'connect failed:', err)
-    --         goto sendexit
-    --     end
-    --
-    --     bytes, err = sock:send(tabletostring(data))
-    --     if err then
-    --         log(ERR, 'connect send:', ins(err))
-    --         goto sendexit
-    --     -- else
-    --         -- log(DBG, 'sending ok:', host, ':', port, '=', format_bytes(data), ',len=', bytes)
-    --     end
-    --     -- sock:settimeouts(10000,10000,10000)
-    --     maxreadsize = maxreadsize or 1024
-    --     readdata, err = sock:receiveany(maxreadsize) -- received most 1k data
-    --     if not readdata then
-    --         log(ERR, 'receiveany failed:', err)
-    --         goto sendexit
-    --     end
-    --     -- print(ins(readdata))
-    --     ok, err = sock:setkeepalive(KEEPALIVE_TIMEOUT)
-    --     if not ok then
-    --         log(ERR, 'keep alive failed', err)
-    --     end
-    -- end
-    --
-    -- ::sendexit::
-    -- -- sometimes, can not get lock
-    -- if mylock then
-    --     lock.unlock(mylock)
-    -- else
-    --     log(ERR, 'failed to get lock:', lockname)
-    -- end
-    --
-    -- return readdata, err
+    local lockname = format('hp:%s:%s', host, port)
+    local mylock = lock.lock(lockname)
+
+    do
+        ok, err = sock:connect(host, port)
+        if not ok then
+            log(ERR, 'connect failed:', err)
+            goto sendexit
+        end
+
+        bytes, err = sock:send(tabletostring(data))
+        if err then
+            log(ERR, 'connect send:', ins(err))
+            goto sendexit
+        -- else
+            -- log(DBG, 'sending ok:', host, ':', port, '=', format_bytes(data), ',len=', bytes)
+        end
+        -- sock:settimeouts(10000,10000,10000)
+        maxreadsize = maxreadsize or 1024
+        readdata, err = sock:receiveany(maxreadsize) -- received most 1k data
+        if not readdata then
+            log(ERR, 'receiveany failed:', err)
+            goto sendexit
+        end
+        -- print(ins(readdata))
+        ok, err = sock:setkeepalive(KEEPALIVE_TIMEOUT)
+        if not ok then
+            log(ERR, 'keep alive failed', err)
+        end
+    end
+
+    ::sendexit::
+    -- sometimes, can not get lock
+    if mylock then
+        lock.unlock(mylock)
+    else
+        log(ERR, 'failed to get lock:', lockname)
+    end
+
+    return readdata, err
 end
 
 -- local data = {0x0F,0x03,0x0,0x0,0x0,0x16,0xC5,0x2A}

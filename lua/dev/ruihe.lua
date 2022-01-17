@@ -3,7 +3,7 @@ local cjson  = require "cjson.safe"
 local ds     = require "lib.ds"
 
 local log = ngx.log
--- local ERR = ngx.ERR
+local ERR = ngx.ERR
 local DBG = ngx.DEBUG
 local ins = require 'lib.inspect'
 
@@ -38,6 +38,9 @@ end
 
 _M.set = function(tp, val, serialize)
     local data = _M.data
+    if not data[tp] then
+        return nil
+    end
     val = tonumber(val)
     if val ~= data[tp] then
         data[tp] = val
@@ -45,6 +48,7 @@ _M.set = function(tp, val, serialize)
             _M.serialization()
         end
     end
+    return true
 end
 
 _M.get = function(tp)
@@ -86,7 +90,7 @@ _M.unserialization = function()
     -- local d_str = cjson.encode(d)
     local redis = helprd.get()
     local d_str = redis:get(key)
-    -- log(ERR, d_str)
+    log(ERR, d_str)
     if d_str then
         local d = cjson.decode(d_str)
         if d then
