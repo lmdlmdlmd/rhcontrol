@@ -19,7 +19,11 @@ local emptytable = util.emptytable
 local log = ngx.log
 local ERR = ngx.ERR
 local DBG = ngx.DEBUG
--- local ins = require 'lib.inspect'
+local ins = require 'lib.inspect'
+
+-- Cannot serialise table: excessively sparse array
+-- 针对稀疏举证，不能够
+cjson.encode_sparse_array(nil, nil, 2^15)
 
 local Aircond = {}
 Aircond.__index = Aircond
@@ -127,6 +131,9 @@ Aircond.set_data_index = function(self, index, val, tp, serialize)
     data[nindex - 1] = highbits
     data[nindex] = lowbits
 
+    -- log(DBG, nindex)
+    -- log(DBG, highbits, ':', lowbits)
+    -- log(DBG, serialize)
     if serialize then
         Aircond.serialization(self)
     end
@@ -240,8 +247,12 @@ Aircond.serialization = function(self)
         ts = ngx.time()
     }
     local key = get_key(dev_config.name, self.addr)
-    local d_str = cjson.encode(d)
-    -- log(ERR, d_str)
+    local d_str, err = cjson.encode(d)
+    if err then
+        log(ERR, d_str)
+        log(ERR,ins(d))
+        log(ERR, err)
+    end
     local redis = helprd.get()
     redis:set(key, d_str)
     return  true
@@ -256,8 +267,8 @@ Aircond.unserialization = function(self)
     if d_str then
         local d = cjson.decode(d_str)
         if d then
-            self.input_data = nulltonil(d.input_data)
-            self.hold_data = nulltonil(d.hold_data)
+            self.input_data = nulltonil(d.input_data) or self.input_data
+            self.hold_data = nulltonil(d.hold_data) or self.hold_data
             self.health = d.health
             self.sick_count = d.sick_count
             self.ts = d.ts
@@ -265,6 +276,23 @@ Aircond.unserialization = function(self)
         end
     end
     return  false
+end
+
+Aircond.input_hold = function(self)
+    local data = {}
+    local status = {}
+    for i = Air.INPUT_ADDR_VER, Air.INPUT_ADDR_HEARTBEAT, 1 do
+        local v = Aircond.get(self, i)
+        status[Air.get_input_name(i)] =  v
+    end
+    local settings = {}
+    for i = Air.HOLD_ADDR_TEST, Air.HOLD_ADDR_SYNC, 1 do
+      local v = Aircond.get_hold(self, i)
+      settings[Air.get_hold_name(i)] = v
+    end
+    data.status = status
+    data.setgings = settings
+    return data
 end
 
 Aircond.__tostring = function(self)
@@ -288,6 +316,8 @@ Aircond.__tostring = function(self)
       str[#str + 1] =
           format("%s = %s", Air.get_hold_name(i), v)
     end
+    -- log(DBG, ins(self.input_data))
+    -- log(DBG, ins(self.hold_data))
     return table.concat(str, "\r\n")
 end
 

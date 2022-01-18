@@ -101,6 +101,15 @@ _M.unserialization = function()
     return  false
 end
 
+_M.input_hold = function()
+    local data = {
+        settings = _M.data,
+        alarms = _M.alarms
+    }
+
+    return data
+end
+
 _M.tostring = function()
     local str = {}
     str[#str + 1] = 'data:'

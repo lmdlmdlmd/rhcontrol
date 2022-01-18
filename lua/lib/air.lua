@@ -33,7 +33,7 @@ local _M = {
   INPUT_ADDR_HEARTBEAT = 11,
   input_names = {
       "VER",
-      "SPR1", "SPE1", "SPR2", "HPE", "HWID1", "HWID2", "ST1", "HT1", "HEALTH",
+      "SPR1", "SPE1", "SPR2", "SPE2", "HPE", "HWID1", "HWID2", "ST1", "HT1", "HEALTH",
       "HEARTBEAT"
   },
 

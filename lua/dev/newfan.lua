@@ -254,8 +254,8 @@ Newfan.unserialization = function(self)
     if d_str then
         local d = cjson.decode(d_str)
         if d then
-            self.input_data = nulltonil(d.input_data)
-            self.hold_data = nulltonil(d.hold_data)
+            self.input_data = nulltonil(d.input_data) or self.input_data
+            self.hold_data = nulltonil(d.hold_data) or self.hold_data
             self.health = d.health
             self.sick_count = d.sick_count
             self.ts = d.ts
@@ -279,6 +279,23 @@ Newfan.get_ld2 = function(self)
     local sah1 = Newfan.get(self, Fan.INPUT_ADDR_SAH1)
 
     return Ld.get_ld(sat1, sah1)
+end
+
+Newfan.input_hold = function(self)
+    local data = {}
+    local status = {}
+    for i = Fan.INPUT_ADDR_VER, Fan.INPUT_ADDR_HEARTBEAT, 1 do
+        local v = Newfan.get(self, i)
+        status[Fan.get_input_name(i)] =  v
+    end
+    local settings = {}
+    for i = Fan.HOLD_ADDR_TEST, Fan.HOLD_ADDR_SYNC, 1 do
+      local v = Newfan.get_hold(self, i)
+      settings[Fan.get_hold_name(i)] = v
+    end
+    data.status = status
+    data.setgings = settings
+    return data
 end
 
 Newfan.__tostring = function(self)

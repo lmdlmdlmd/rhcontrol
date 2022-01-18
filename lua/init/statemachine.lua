@@ -86,8 +86,8 @@ _M.run = function()
     -- operation.write()
 
     -- log(DBG, ate)
-    -- log(DBG, fan1)
-    -- log(DBG, air1)
+    log(DBG, fan1)
+    log(DBG, air1)
     log(DBG, ruihe.tostring())
 
     log(DBG, 'END ************************* END')
