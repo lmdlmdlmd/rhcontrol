@@ -24,6 +24,9 @@ local DBG = ngx.DEBUG
 local Newfan = {}
 Newfan.__index = Newfan
 
+-- Cannot serialise table: excessively sparse array
+-- 针对稀疏举证，不能够
+cjson.encode_sparse_array(nil, nil, 2^15)
 
 -- 1— 位操作指令：读线圈状态01H、读离散输入状态02H、写单个线圈05H、写多个线圈0FH.
 -- 2— 字节操作指令：读保存寄存器03H、读输入寄存器04H、写单个保存寄存器06H、写多个保存寄存器10H.
