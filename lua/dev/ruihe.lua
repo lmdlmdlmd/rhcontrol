@@ -30,6 +30,13 @@ local _M = {
     },
     alarms = {}
 }
+local donotneed_multi_10 = {
+  MODE = 1,
+  FAX = 1,
+  EAX = 1,
+  LDS1 = 1,
+  LDS2 = 1
+}
 -- local format = string.format
 
 local get_key = function()
@@ -54,7 +61,11 @@ end
 _M.get = function(tp)
     if not tp then return nil end
     local data = _M.data
-    return data[tp]
+    if donotneed_multi_10[tp] then
+      return data[tp]
+    else
+      return data[tp] * 10
+    end
 end
 
 _M.set_alarm = function( i )

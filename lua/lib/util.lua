@@ -61,4 +61,30 @@ _M.index = function(list, val)
     return nil
 end
 
+_M.get_model = function(key, item, val)
+    if not key or not item then
+        return nil
+    end
+    local newitem = {
+        modelName = key,
+        type = 'num'
+    }
+    if val then
+        newitem.value = val
+    end
+    if item['name'] then
+        newitem['inputLabel'] = item['name']
+    end
+    if item['type'] then
+        newitem['type'] = item['type']
+    end
+    if newitem['type'] == 'num' then
+        newitem['min'] = item['min'] or 0
+        newitem['max'] = item['max'] or 1000
+    end
+    newitem['extra'] = item['extra']
+
+    return newitem
+end
+
 return _M

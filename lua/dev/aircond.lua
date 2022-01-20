@@ -291,7 +291,7 @@ Aircond.input_hold = function(self)
       settings[Air.get_hold_name(i)] = v
     end
     data.status = status
-    data.setgings = settings
+    data.settings = settings
     return data
 end
 

@@ -273,6 +273,10 @@ Newfan.get_ld1 = function(self)
     local rat1 = Newfan.get(self, Fan.INPUT_ADDR_RAT1)
     local rah1 = Newfan.get(self, Fan.INPUT_ADDR_RAH1)
 
+    if rat1 and rah1 then
+        rat1 = rat1 / 10
+        rah1 = rah1 / 10
+    end
     return Ld.get_ld(rat1, rah1)
 end
 
@@ -281,6 +285,10 @@ Newfan.get_ld2 = function(self)
     local sat1 = Newfan.get(self, Fan.INPUT_ADDR_SAT1)
     local sah1 = Newfan.get(self, Fan.INPUT_ADDR_SAH1)
 
+    if sat1 and sah1 then
+        sat1 = sat1 / 10
+        sah1 = sah1 / 10
+    end
     return Ld.get_ld(sat1, sah1)
 end
 
@@ -297,7 +305,7 @@ Newfan.input_hold = function(self)
       settings[Fan.get_hold_name(i)] = v
     end
     data.status = status
-    data.setgings = settings
+    data.settings = settings
     return data
 end
 
